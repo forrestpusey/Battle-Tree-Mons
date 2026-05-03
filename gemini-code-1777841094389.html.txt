@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Tree Tracker</title>
+    <style>
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        h2 { margin-top: 0; color: #2c3e50; }
+        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 4px; width: 100%; cursor: pointer; }
+        .record-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Add New Run</h2>
+        <input type="text" id="p1" placeholder="Pokémon 1 (e.g. Garchomp)">
+        <input type="text" id="p2" placeholder="Pokémon 2 (e.g. Tapu Koko)">
+        <input type="text" id="p3" placeholder="Pokémon 3 (e.g. Celesteela)">
+        <input type="number" id="wins" placeholder="Number of Wins">
+        <button onclick="saveRun()">Save Run</button>
+    </div>
+
+    <div class="card">
+        <h2>History</h2>
+        <div id="historyList"></div>
+    </div>
+
+    <script>
+        // Load data on start
+        window.onload = displayHistory;
+
+        function saveRun() {
+            const run = {
+                team: [document.getElementById('p1').value, document.getElementById('p2').value, document.getElementById('p3').value],
+                wins: parseInt(document.getElementById('wins').value),
+                date: new Date().toLocaleDateString()
+            };
+
+            let history = JSON.parse(localStorage.getItem('bt_records')) || [];
+            history.push(run);
+            localStorage.setItem('bt_records', JSON.stringify(history));
+            
+            // Clear inputs
+            document.querySelectorAll('input').forEach(i => i.value = '');
+            displayHistory();
+        }
+
+        function displayHistory() {
+            const history = JSON.parse(localStorage.getItem('bt_records')) || [];
+            const list = document.getElementById('historyList');
+            list.innerHTML = history.map(run => `
+                <div class="record-item">
+                    <strong>${run.wins} Wins</strong> - ${run.team.join(', ')} <br>
+                    <small>${run.date}</small>
+                </div>
+            `).reverse().join('');
+        }
+    </script>
+</body>
+</html>
