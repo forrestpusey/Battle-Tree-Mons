@@ -34,12 +34,13 @@
         
         .poke-sprite { position: absolute; bottom: -2px; right: -2px; width: 50px; height: 50px; filter: drop-shadow(1px 1px 0px white); image-rendering: pixelated; }
         
-        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 3px; display: inline-block; }
+        .badge { font-size: 0.65rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 3px; display: inline-block; vertical-align: middle; }
         .badge-30 { background: #cd7f32; color: white; }
         .badge-40 { background: #bdc3c7; color: white; }
         .badge-50 { background: #f1c40f; color: black; }
         .badge-100 { background: #9b59b6; color: white; }
-        .badge-loyalty { background: #3498db; color: white; }
+        .badge-veteran { background: #a29bfe; color: white; } /* Soft Periwinkle */
+        .badge-ace { background: #2ecc71; color: white; } /* Emerald Green */
         
         .badge-key { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; justify-content: center; }
         .key-item { font-size: 0.55rem; color: #666; display: flex; align-items: center; }
@@ -95,7 +96,8 @@
                 <div class="key-item"><span class="badge badge-40">S</span> 40+</div>
                 <div class="key-item"><span class="badge badge-50">G</span> 50+</div>
                 <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
-                <div class="key-item"><span class="badge badge-loyalty">L</span> 5+ Runs</div>
+                <div class="key-item"><span class="badge badge-veteran">★</span> 6+ Runs</div>
+                <div class="key-item"><span class="badge badge-ace">A</span> Elite (45+ R, 3+ Runs)</div>
             </div>
             <div id="statsList" class="stats-grid"></div>
         </div>
@@ -126,7 +128,7 @@
 
     <script>
         let currentSort = 'wins';
-        let sortDirection = -1; // -1 for desc, 1 for asc
+        let sortDirection = -1;
         let currentHistorySort = 'date';
         let editingId = null;
 
@@ -273,17 +275,18 @@
             });
 
             document.getElementById('statsList').innerHTML = sortedStats.map((name, index) => {
-                const rating = calculateRating(stats[name].wins, stats[name].runs).toFixed(1);
+                const ratingValue = calculateRating(stats[name].wins, stats[name].runs);
+                const ratingDisplay = ratingValue.toFixed(1);
                 const species = extractSpecies(name);
                 
                 return `
                 <div class="stat-box">
-                    <span class="rating-chip">R: ${rating}</span>
+                    <span class="rating-chip">R: ${ratingDisplay}</span>
                     <div style="font-weight:bold; font-size:0.75rem; border-bottom: 1px solid #ddd; margin-bottom: 4px; padding-right: 35px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <span class="rank-number">#${index + 1}</span> ${name}
                     </div>
                     <div style="font-size:0.65rem;">Wins: <strong>${stats[name].wins}</strong></div>
-                    <div style="font-size:0.65rem;">Peak: <strong>${stats[name].max}</strong> ${getBadges(stats[name].max, stats[name].runs)}</div>
+                    <div style="font-size:0.65rem;">Peak: <strong>${stats[name].max}</strong> ${getBadges(stats[name].max, stats[name].runs, ratingValue)}</div>
                     <div style="font-size:0.65rem; color:#888;">Runs: ${stats[name].runs}</div>
                     <img class="poke-sprite" src="https://img.pokemondb.net/sprites/sun-moon/icon/${species}.png" onerror="this.style.display='none'">
                 </div>
@@ -310,14 +313,21 @@
             }).join('');
         }
 
-        function getBadges(max, runs) {
+        function getBadges(max, runs, rating) {
             let badges = '';
+            
+            // Peak Wins Badges
             if(max >= 100) badges += '<span class="badge badge-100">D</span>';
             else if(max >= 50) badges += '<span class="badge badge-50">G</span>';
             else if(max >= 40) badges += '<span class="badge badge-40">S</span>';
             else if(max >= 30) badges += '<span class="badge badge-30">B</span>';
             
-            if(runs >= 5) badges += '<span class="badge badge-loyalty">L</span>';
+            // Veteran Badge (6+ Runs)
+            if(runs >= 6) badges += '<span class="badge badge-veteran">★</span>';
+
+            // Ace Badge (45+ Rating AND 3+ Runs)
+            if(rating >= 45 && runs >= 3) badges += '<span class="badge badge-ace">A</span>';
+
             return badges;
         }
 
