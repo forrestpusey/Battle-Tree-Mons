@@ -25,8 +25,7 @@
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; position: relative; min-height: 85px; overflow: hidden; }
         
-        /* Sprite alignment */
-        .poke-sprite { position: absolute; bottom: -5px; right: -5px; width: 56px; height: 56px; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.1)); }
+        .poke-sprite { position: absolute; bottom: -2px; right: -2px; width: 50px; height: 50px; filter: drop-shadow(1px 1px 0px white); image-rendering: pixelated; }
         
         .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 5px; }
         .badge-30 { background: #cd7f32; color: white; }
@@ -54,9 +53,9 @@
     <div class="card">
         <h2>New Run</h2>
         <div class="edit-row">
-            <input type="text" id="p1" list="poke-list" placeholder="Nick (Species)">
-            <input type="text" id="p2" list="poke-list" placeholder="Nick (Species)">
-            <input type="text" id="p3" list="poke-list" placeholder="Nick (Species)">
+            <input type="text" id="p1" list="poke-list" placeholder="Nick (Species-Form)">
+            <input type="text" id="p2" list="poke-list" placeholder="Nick (Species-Form)">
+            <input type="text" id="p3" list="poke-list" placeholder="Nick (Species-Form)">
             <input type="text" id="p4" list="poke-list" placeholder="Optional Slot">
         </div>
         <input type="number" id="wins" placeholder="Streak Length">
@@ -70,11 +69,9 @@
         <button class="tab-btn" onclick="switchTab('settings', this)">Tools</button>
     </div>
 
-    <!-- LEADERBOARD TAB -->
     <div id="leaderboard" class="tab-content active">
         <div class="card">
-            <h2>
-                Rankings
+            <h2>Rankings
                 <div style="display: flex;">
                     <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
                     <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Runs</button>
@@ -92,11 +89,9 @@
         </div>
     </div>
 
-    <!-- HISTORY TAB -->
     <div id="history" class="tab-content">
         <div class="card">
-            <h2>
-                Log
+            <h2>Log
                 <div>
                     <button class="sort-btn active" id="sortDateHist" onclick="setHistorySort('date')">Recent</button>
                     <button class="sort-btn" id="sortWinHist" onclick="setHistorySort('wins')">Highest</button>
@@ -106,7 +101,6 @@
         </div>
     </div>
 
-    <!-- SETTINGS TAB -->
     <div id="settings" class="tab-content">
         <div class="card">
             <h2>Management</h2>
@@ -185,11 +179,10 @@
         }
 
         function extractSpecies(fullName) {
-            // Looks for anything inside parentheses
             const match = fullName.match(/\(([^)]+)\)/);
-            if (match) return match[1].trim().toLowerCase().replace(/\s+/g, '-');
-            // If no parens, use the whole name (lowercase and hyphenated)
-            return fullName.trim().toLowerCase().replace(/\s+/g, '-');
+            let raw = match ? match[1] : fullName;
+            // Clean up name for URL: lowercase, replace spaces with hyphens
+            return raw.trim().toLowerCase().replace(/\s+/g, '-');
         }
 
         function updateDisplay() {
@@ -266,7 +259,7 @@
         function exportData() {
             const d = localStorage.getItem('bt_records');
             if(!d) return alert("No data!");
-            navigator.clipboard.writeText(d).then(() => alert("Code copied to clipboard!"));
+            navigator.clipboard.writeText(d).then(() => alert("Code copied!"));
         }
         function importData() {
             const c = prompt("Paste backup code:");
