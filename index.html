@@ -11,7 +11,7 @@
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
         button { background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .save-btn { background: #27ae60; width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
-        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.7rem; padding: 5px 10px; border-radius: 4px; margin-left: 4px; }
+        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.65rem; padding: 5px 8px; border-radius: 4px; margin-left: 2px; }
         .sort-btn.active { background: #3498db; color: white; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
@@ -20,8 +20,8 @@
         .badge-40 { background: #bdc3c7; color: white; }
         .badge-50 { background: #f1c40f; color: black; }
         .badge-100 { background: #9b59b6; color: white; }
-        .badge-key { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; }
-        .key-item { font-size: 0.65rem; color: #666; display: flex; align-items: center; }
+        .badge-key { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; justify-content: center; }
+        .key-item { font-size: 0.6rem; color: #666; display: flex; align-items: center; }
         .history-item { border-bottom: 2px solid #f0f2f5; padding: 15px 0; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .team-display { font-size: 0.9rem; color: #555; line-height: 1.4; }
@@ -59,6 +59,7 @@
             <div>
                 <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
                 <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Usage</button>
+                <button class="sort-btn" id="sortPeak" onclick="setSort('peak')">Peak</button>
             </div>
         </h2>
         
@@ -87,6 +88,7 @@
             currentSort = type;
             document.getElementById('sortWins').classList.toggle('active', type === 'wins');
             document.getElementById('sortRuns').classList.toggle('active', type === 'runs');
+            document.getElementById('sortPeak').classList.toggle('active', type === 'peak');
             updateDisplay();
         }
 
@@ -104,7 +106,6 @@
         }
 
         function toggleEdit(id) {
-            // If clicking the same one, close it. Otherwise, open just this one.
             editingId = (editingId === id) ? null : id;
             updateDisplay();
         }
@@ -115,7 +116,6 @@
             if (runIndex > -1) {
                 history[runIndex].team[index] = newName.trim();
                 localStorage.setItem('bt_records', JSON.stringify(history));
-                // We keep editingId active so the keyboard doesn't close while typing multiple slots
             }
         }
 
@@ -147,7 +147,9 @@
             document.getElementById('poke-list').innerHTML = Array.from(uniqueNames).map(n => `<option value="${n}">`).join('');
 
             const sorted = Object.keys(stats).sort((a,b) => {
-                return currentSort === 'wins' ? stats[b].wins - stats[a].wins : stats[b].runs - stats[a].runs;
+                if(currentSort === 'wins') return stats[b].wins - stats[a].wins;
+                if(currentSort === 'runs') return stats[b].runs - stats[a].runs;
+                return stats[b].max - stats[a].max;
             });
 
             document.getElementById('statsList').innerHTML = sorted.map(name => `
