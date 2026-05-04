@@ -9,21 +9,25 @@
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
         h2 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
-        button { background: #3498db; color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+        button { background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .save-btn { background: #27ae60; width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
+        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.7rem; padding: 5px 10px; border-radius: 4px; margin-left: 4px; }
+        .sort-btn.active { background: #3498db; color: white; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
-        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; display: inline-block; margin-top: 5px; text-transform: uppercase; }
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 5px; }
         .badge-30 { background: #cd7f32; color: white; }
         .badge-40 { background: #bdc3c7; color: white; }
         .badge-50 { background: #f1c40f; color: black; }
         .badge-100 { background: #9b59b6; color: white; }
         .history-item { border-bottom: 2px solid #f0f2f5; padding: 15px 0; }
-        .edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .btn-small { background: #95a5a6; padding: 5px 10px; font-size: 0.7rem; margin-top: 5px; }
+        .team-display { font-size: 0.9rem; color: #555; line-height: 1.4; }
+        .edit-row { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 5px; }
+        .btn-small { background: #95a5a6; padding: 4px 8px; font-size: 0.65rem; margin-left: 5px; }
         .tools { display: flex; gap: 5px; margin-top: 10px; }
         .tools button { flex: 1; font-size: 0.7rem; background: #34495e; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
@@ -36,29 +40,45 @@
             <input type="text" id="p3" list="poke-list" placeholder="Slot 3">
             <input type="text" id="p4" list="poke-list" placeholder="Slot 4 (Opt)">
         </div>
-        <input type="number" id="wins" placeholder="Win Streak">
+        <input type="number" id="wins" placeholder="Win Streak Count">
         <button class="save-btn" onclick="saveRun()">Save Run</button>
         <datalist id="poke-list"></datalist>
         
         <div class="tools">
-            <button onclick="exportData()">Backup Code</button>
-            <button onclick="importData()">Restore Code</button>
-            <button style="background:#e74c3c" onclick="clearData()">Wipe All</button>
+            <button onclick="exportData()">Backup</button>
+            <button onclick="importData()">Restore</button>
+            <button style="background:#e74c3c" onclick="clearData()">Wipe</button>
         </div>
     </div>
 
     <div class="card">
-        <h2>Leaderboard</h2>
+        <h2>
+            Leaderboard
+            <div>
+                <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
+                <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Usage</button>
+            </div>
+        </h2>
         <div id="statsList" class="stats-grid"></div>
     </div>
 
     <div class="card">
-        <h2>History (Edit below to update stats)</h2>
+        <h2>History</h2>
         <div id="historyList"></div>
     </div>
 
     <script>
+        let currentSort = 'wins';
+        let editingId = null;
+
         window.onload = updateDisplay;
+
+        function setSort(type) {
+            currentSort = type;
+            document.getElementById('sortWins').classList.toggle('active', type === 'wins');
+            document.getElementById('sortRuns').classList.toggle('active', type === 'runs');
+            updateDisplay();
+        }
 
         function saveRun() {
             const team = ['p1', 'p2', 'p3', 'p4'].map(id => document.getElementById(id).value.trim()).filter(v => v);
@@ -73,13 +93,18 @@
             updateDisplay();
         }
 
+        function toggleEdit(id) {
+            editingId = (editingId === id) ? null : id;
+            updateDisplay();
+        }
+
         function updateEntry(id, index, newName) {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             const runIndex = history.findIndex(r => r.id === id);
             if (runIndex > -1) {
                 history[runIndex].team[index] = newName.trim();
                 localStorage.setItem('bt_records', JSON.stringify(history));
-                updateDisplay(); // Leaderboard refreshes instantly
+                // Don't close edit mode here so user can finish multiple slots
             }
         }
 
@@ -96,7 +121,6 @@
             const stats = {};
             const uniqueNames = new Set();
 
-            // Calculate Stats
             history.forEach(run => {
                 run.team.forEach(name => {
                     if(!name) return;
@@ -108,46 +132,58 @@
                 });
             });
 
-            // Update Dropdown
             document.getElementById('poke-list').innerHTML = Array.from(uniqueNames).map(n => `<option value="${n}">`).join('');
 
-            // Leaderboard
-            const sorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins);
+            const sorted = Object.keys(stats).sort((a,b) => {
+                return currentSort === 'wins' ? stats[b].wins - stats[a].wins : stats[b].runs - stats[a].runs;
+            });
+
             document.getElementById('statsList').innerHTML = sorted.map(name => `
                 <div class="stat-box">
-                    <div style="font-weight:bold; font-size:0.8rem;">${name}</div>
-                    <div style="font-size:0.65rem;">Total Wins: ${stats[name].wins}</div>
-                    ${getBadge(stats[name].max)}
+                    <div style="font-weight:bold; font-size:0.85rem; border-bottom: 1px solid #ddd; margin-bottom: 5px;">${name}</div>
+                    <div style="font-size:0.7rem;">Total Wins: <strong>${stats[name].wins}</strong></div>
+                    <div style="font-size:0.7rem;">Peak Streak: <strong>${stats[name].max}</strong> ${getBadge(stats[name].max)}</div>
+                    <div style="font-size:0.7rem; color:#888;">Runs: ${stats[name].runs}</div>
                 </div>
             `).join('');
 
-            // History with inline editing
-            document.getElementById('historyList').innerHTML = history.slice().reverse().map(run => `
+            document.getElementById('historyList').innerHTML = history.slice().reverse().map(run => {
+                const isEditing = editingId === run.id;
+                return `
                 <div class="history-item">
                     <div class="history-header">
                         <strong>${run.wins} Wins</strong>
-                        <button class="btn-small" style="background:#e74c3c" onclick="deleteRun(${run.id})">Delete</button>
+                        <div>
+                            <button class="btn-small" onclick="toggleEdit(${run.id})">${isEditing ? 'Done' : 'Edit'}</button>
+                            <button class="btn-small" style="background:#e74c3c" onclick="deleteRun(${run.id})">Del</button>
+                        </div>
                     </div>
-                    <div class="edit-row">
+                    
+                    <div class="team-display ${isEditing ? 'hidden' : ''}">
+                        ${run.team.join(' / ')}
+                    </div>
+
+                    <div class="edit-row ${isEditing ? '' : 'hidden'}">
                         ${run.team.map((name, i) => `
                             <input type="text" value="${name}" onchange="updateEntry(${run.id}, ${i}, this.value)">
                         `).join('')}
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function getBadge(m) {
-            if(m >= 100) return '<span class="badge badge-100">Diamond</span>';
-            if(m >= 50) return '<span class="badge badge-50">Gold</span>';
-            if(m >= 40) return '<span class="badge badge-40">Silver</span>';
-            if(m >= 30) return '<span class="badge badge-30">Bronze</span>';
+            if(m >= 100) return '<span class="badge badge-100">D</span>';
+            if(m >= 50) return '<span class="badge badge-50">G</span>';
+            if(m >= 40) return '<span class="badge badge-40">S</span>';
+            if(m >= 30) return '<span class="badge badge-30">B</span>';
             return '';
         }
 
         function exportData() {
             const d = localStorage.getItem('bt_records');
-            navigator.clipboard.writeText(d).then(() => alert("Copied to clipboard!"));
+            navigator.clipboard.writeText(d).then(() => alert("Backup copied!"));
         }
 
         function importData() {
