@@ -5,59 +5,102 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battle Tree Tracker</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; }
+        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
         .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: #2c3e50; }
+        h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; }
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #e74c3c; color: white; border: none; padding: 10px 15px; border-radius: 4px; width: 100%; cursor: pointer; }
-        .record-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        button { background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .record-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.9rem; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-box { background: #ecf0f1; padding: 10px; border-radius: 4px; text-align: center; }
+        .optional { background: #fffdf0; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h2>Add New Run</h2>
-        <input type="text" id="p1" placeholder="Pokémon 1 (e.g. Garchomp)">
-        <input type="text" id="p2" placeholder="Pokémon 2 (e.g. Tapu Koko)">
-        <input type="text" id="p3" placeholder="Pokémon 3 (e.g. Celesteela)">
-        <input type="number" id="wins" placeholder="Number of Wins">
+        <input type="text" id="p1" placeholder="Pokémon 1">
+        <input type="text" id="p2" placeholder="Pokémon 2">
+        <input type="text" id="p3" placeholder="Pokémon 3">
+        <input type="text" id="p4" class="optional" placeholder="Pokémon 4 (Optional)">
+        <input type="number" id="wins" placeholder="Total Wins">
         <button onclick="saveRun()">Save Run</button>
+    </div>
+
+    <div class="card">
+        <h2>Individual Pokémon Stats</h2>
+        <div id="statsList" class="stats-grid"></div>
     </div>
 
     <div class="card">
         <h2>History</h2>
         <div id="historyList"></div>
+        <button onclick="clearData()" style="background:#95a5a6; font-size: 0.7rem; margin-top: 20px;">Clear All Data</button>
     </div>
 
     <script>
-        // Load data on start
-        window.onload = displayHistory;
+        window.onload = updateDisplay;
 
         function saveRun() {
-            const run = {
-                team: [document.getElementById('p1').value, document.getElementById('p2').value, document.getElementById('p3').value],
-                wins: parseInt(document.getElementById('wins').value),
-                date: new Date().toLocaleDateString()
-            };
+            const p1 = document.getElementById('p1').value.trim();
+            const p2 = document.getElementById('p2').value.trim();
+            const p3 = document.getElementById('p3').value.trim();
+            const p4 = document.getElementById('p4').value.trim();
+            const wins = parseInt(document.getElementById('wins').value) || 0;
+
+            if(!p1 || !wins) return alert("Please enter at least one Pokémon and win count.");
+
+            const team = [p1, p2, p3];
+            if(p4) team.push(p4);
+
+            const run = { team, wins, date: new Date().toLocaleDateString() };
 
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             history.push(run);
             localStorage.setItem('bt_records', JSON.stringify(history));
             
-            // Clear inputs
             document.querySelectorAll('input').forEach(i => i.value = '');
-            displayHistory();
+            updateDisplay();
         }
 
-        function displayHistory() {
+        function updateDisplay() {
             const history = JSON.parse(localStorage.getItem('bt_records')) || [];
+            
+            // Update History List
             const list = document.getElementById('historyList');
             list.innerHTML = history.map(run => `
                 <div class="record-item">
-                    <strong>${run.wins} Wins</strong> - ${run.team.join(', ')} <br>
-                    <small>${run.date}</small>
+                    <strong>${run.wins} Wins</strong> - ${run.team.join(', ')}
                 </div>
             `).reverse().join('');
+
+            // Update Individual Stats
+            const stats = {};
+            history.forEach(run => {
+                run.team.forEach(name => {
+                    const poke = name.toLowerCase().trim();
+                    if(!stats[poke]) stats[poke] = { totalWins: 0, appearances: 0 };
+                    stats[poke].totalWins += run.wins;
+                    stats[poke].appearances += 1;
+                });
+            });
+
+            const statsList = document.getElementById('statsList');
+            statsList.innerHTML = Object.keys(stats).map(name => `
+                <div class="stat-box">
+                    <div style="text-transform: capitalize; font-weight: bold;">${name}</div>
+                    <div style="font-size: 0.8rem;">Wins: ${stats[name].totalWins}</div>
+                    <div style="font-size: 0.8rem;">Runs: ${stats[name].appearances}</div>
+                </div>
+            `).join('');
+        }
+
+        function clearData() {
+            if(confirm("Delete all records?")) {
+                localStorage.clear();
+                updateDisplay();
+            }
         }
     </script>
 </body>
