@@ -11,10 +11,10 @@
         input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
         button { background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .save-btn { background: #27ae60; width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
-        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.6rem; padding: 4px 6px; border-radius: 4px; margin-left: 2px; }
+        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.58rem; padding: 4px 5px; border-radius: 4px; margin-left: 2px; text-transform: uppercase; }
         .sort-btn.active { background: #3498db; color: white; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; }
+        .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; position: relative; }
         .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 5px; }
         .badge-30 { background: #cd7f32; color: white; }
         .badge-40 { background: #bdc3c7; color: white; }
@@ -30,7 +30,7 @@
         .tools { display: flex; gap: 5px; margin-top: 10px; }
         .tools button { flex: 1; font-size: 0.7rem; background: #34495e; }
         .hidden { display: none; }
-        .avg-text { font-size: 0.65rem; color: #27ae60; font-weight: bold; }
+        .rating-chip { position: absolute; top: 5px; right: 5px; font-size: 0.6rem; background: #e8f4fd; color: #3498db; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -61,7 +61,7 @@
                 <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
                 <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Runs</button>
                 <button class="sort-btn" id="sortPeak" onclick="setSort('peak')">Peak</button>
-                <button class="sort-btn" id="sortRatio" onclick="setSort('ratio')">Ratio</button>
+                <button class="sort-btn" id="sortRatio" onclick="setSort('ratio')">Rating</button>
             </div>
         </h2>
         
@@ -96,8 +96,8 @@
         function setSort(type) {
             currentSort = type;
             document.querySelectorAll('[id^="sort"]').forEach(btn => btn.classList.remove('active'));
-            const map = {'wins': 'sortWins', 'runs': 'sortRuns', 'peak': 'sortPeak', 'ratio': 'sortRatio'};
-            if(map[type]) document.getElementById(map[type]).classList.add('active');
+            const ids = {'wins':'sortWins','runs':'sortRuns','peak':'sortPeak','ratio':'sortRatio'};
+            document.getElementById(ids[type]).classList.add('active');
             updateDisplay();
         }
 
@@ -142,6 +142,13 @@
             updateDisplay();
         }
 
+        function calculateRating(wins, runs) {
+            if (runs === 0) return 0;
+            const avg = wins / runs;
+            const weight = 1 + Math.log10(runs);
+            return avg * weight;
+        }
+
         function updateDisplay() {
             const historyData = JSON.parse(localStorage.getItem('bt_records')) || [];
             const stats = {};
@@ -164,17 +171,18 @@
                 if(currentSort === 'wins') return stats[b].wins - stats[a].wins;
                 if(currentSort === 'runs') return stats[b].runs - stats[a].runs;
                 if(currentSort === 'peak') return stats[b].max - stats[a].max;
-                return (stats[b].wins / stats[b].runs) - (stats[a].wins / stats[a].runs);
+                return calculateRating(stats[b].wins, stats[b].runs) - calculateRating(stats[a].wins, stats[a].runs);
             });
 
             document.getElementById('statsList').innerHTML = sortedStats.map(name => {
-                const avg = (stats[name].wins / stats[name].runs).toFixed(1);
+                const rating = calculateRating(stats[name].wins, stats[name].runs).toFixed(1);
                 return `
                 <div class="stat-box">
-                    <div style="font-weight:bold; font-size:0.85rem; border-bottom: 1px solid #ddd; margin-bottom: 5px;">${name}</div>
+                    <span class="rating-chip">R: ${rating}</span>
+                    <div style="font-weight:bold; font-size:0.85rem; border-bottom: 1px solid #ddd; margin-bottom: 5px; padding-right: 35px;">${name}</div>
                     <div style="font-size:0.7rem;">Total Wins: <strong>${stats[name].wins}</strong></div>
                     <div style="font-size:0.7rem;">Peak Streak: <strong>${stats[name].max}</strong> ${getBadge(stats[name].max)}</div>
-                    <div style="font-size:0.7rem; color:#888;">Runs: ${stats[name].runs} <span class="avg-text">(${avg} avg)</span></div>
+                    <div style="font-size:0.7rem; color:#888;">Runs: ${stats[name].runs}</div>
                 </div>
                 `;
             }).join('');
@@ -219,13 +227,7 @@
 
         function importData() {
             const c = prompt("Paste backup code:");
-            if(c) { 
-                try {
-                    JSON.parse(c);
-                    localStorage.setItem('bt_records', c); 
-                    updateDisplay();
-                } catch(e) { alert("Invalid code!"); }
-            }
+            if(c) { try { JSON.parse(c); localStorage.setItem('bt_records', c); updateDisplay(); } catch(e) { alert("Invalid code!"); } }
         }
 
         function clearData() { if(confirm("Wipe everything?")) { localStorage.clear(); updateDisplay(); } }
