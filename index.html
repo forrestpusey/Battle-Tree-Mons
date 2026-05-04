@@ -7,7 +7,7 @@
     <style>
         body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 15px; color: #333; padding-bottom: 80px; margin: 0; }
         .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
-        h2 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        h2 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
         
         #scrollTopBtn {
             display: none; position: fixed; bottom: 20px; right: 20px; z-index: 99;
@@ -22,13 +22,15 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; font-size: 0.9rem; }
         button { background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .save-btn { background: #27ae60; width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
         
-        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.55rem; padding: 4px 5px; border-radius: 4px; margin-left: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 2px; }
+        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.55rem; padding: 4px 5px; border-radius: 4px; margin-left: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 2px; border: 1px solid transparent; }
         .sort-btn.active { background: #3498db; color: white; }
         
+        .filter-select { width: auto; font-size: 0.65rem; padding: 2px 5px; height: 24px; margin: 0; background: #fff; border: 1px solid #3498db; color: #3498db; font-weight: bold; }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border: 1px solid #eee; position: relative; min-height: 85px; overflow: hidden; }
         
@@ -39,8 +41,8 @@
         .badge-40 { background: #bdc3c7; color: white; }
         .badge-50 { background: #f1c40f; color: black; }
         .badge-100 { background: #9b59b6; color: white; }
-        .badge-veteran { background: #a29bfe; color: white; } /* Soft Periwinkle */
-        .badge-ace { background: #2ecc71; color: white; } /* Emerald Green */
+        .badge-veteran { background: #a29bfe; color: white; }
+        .badge-ace { background: #2ecc71; color: white; }
         
         .badge-key { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; justify-content: center; }
         .key-item { font-size: 0.55rem; color: #666; display: flex; align-items: center; }
@@ -83,7 +85,16 @@
     <div id="leaderboard" class="tab-content active">
         <div class="card">
             <h2>Rankings
-                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; align-items: center;">
+                    <select id="badgeFilter" class="filter-select" onchange="updateDisplay()">
+                        <option value="all">All Pokémon</option>
+                        <option value="ace">Aces Only</option>
+                        <option value="veteran">Veterans Only</option>
+                        <option value="100">Diamond Tier</option>
+                        <option value="50">Gold Tier</option>
+                        <option value="40">Silver Tier</option>
+                        <option value="30">Bronze Tier</option>
+                    </select>
                     <button class="sort-btn" id="sortName" onclick="setSort('name')">Name</button>
                     <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
                     <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Runs</button>
@@ -97,7 +108,7 @@
                 <div class="key-item"><span class="badge badge-50">G</span> 50+</div>
                 <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
                 <div class="key-item"><span class="badge badge-veteran">★</span> 6+ Runs</div>
-                <div class="key-item"><span class="badge badge-ace">A</span> Elite (45+ R, 3+ Runs)</div>
+                <div class="key-item"><span class="badge badge-ace">A</span> Elite</div>
             </div>
             <div id="statsList" class="stats-grid"></div>
         </div>
@@ -250,6 +261,7 @@
             const historyData = JSON.parse(localStorage.getItem('bt_records')) || [];
             const stats = {};
             const uniqueNames = new Set();
+            const filterValue = document.getElementById('badgeFilter').value;
 
             historyData.forEach(run => {
                 run.team.forEach(name => {
@@ -264,7 +276,18 @@
 
             document.getElementById('poke-list').innerHTML = Array.from(uniqueNames).map(n => `<option value="${n}">`).join('');
 
-            const sortedStats = Object.keys(stats).sort((a,b) => {
+            let sortedStats = Object.keys(stats).filter(name => {
+                const s = stats[name];
+                const r = calculateRating(s.wins, s.runs);
+                if (filterValue === 'all') return true;
+                if (filterValue === 'ace') return (r >= 45 && s.runs >= 3);
+                if (filterValue === 'veteran') return (s.runs >= 6);
+                if (filterValue === '100') return (s.max >= 100);
+                if (filterValue === '50') return (s.max >= 50 && s.max < 100);
+                if (filterValue === '40') return (s.max >= 40 && s.max < 50);
+                if (filterValue === '30') return (s.max >= 30 && s.max < 40);
+                return true;
+            }).sort((a,b) => {
                 let res = 0;
                 if(currentSort === 'name') res = a.toLowerCase().localeCompare(b.toLowerCase());
                 else if(currentSort === 'wins') res = stats[a].wins - stats[b].wins;
@@ -315,19 +338,12 @@
 
         function getBadges(max, runs, rating) {
             let badges = '';
-            
-            // Peak Wins Badges
             if(max >= 100) badges += '<span class="badge badge-100">D</span>';
             else if(max >= 50) badges += '<span class="badge badge-50">G</span>';
             else if(max >= 40) badges += '<span class="badge badge-40">S</span>';
             else if(max >= 30) badges += '<span class="badge badge-30">B</span>';
-            
-            // Veteran Badge (6+ Runs)
             if(runs >= 6) badges += '<span class="badge badge-veteran">★</span>';
-
-            // Ace Badge (45+ Rating AND 3+ Runs)
             if(rating >= 45 && runs >= 3) badges += '<span class="badge badge-ace">A</span>';
-
             return badges;
         }
 
