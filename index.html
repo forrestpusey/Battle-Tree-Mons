@@ -126,7 +126,10 @@
         let currentHistorySort = 'date';
         let editingId = null;
 
-        window.onload = updateDisplay;
+        window.onload = function() {
+            migrateOldIds(); // Patch old data that might have duplicate IDs
+            updateDisplay();
+        };
 
         window.onscroll = function() {
             const btn = document.getElementById("scrollTopBtn");
@@ -139,6 +142,28 @@
 
         function scrollToTop() {
             window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // Generate a truly unique ID
+        function generateUniqueId() {
+            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+        }
+
+        // This ensures old data with duplicate timestamps gets unique IDs
+        function migrateOldIds() {
+            let history = JSON.parse(localStorage.getItem('bt_records')) || [];
+            let seenIds = new Set();
+            let changed = false;
+
+            history.forEach(run => {
+                if (!run.id || seenIds.has(run.id)) {
+                    run.id = generateUniqueId();
+                    changed = true;
+                }
+                seenIds.add(run.id);
+            });
+
+            if (changed) localStorage.setItem('bt_records', JSON.stringify(history));
         }
 
         function switchTab(tabId, btn) {
@@ -169,35 +194,35 @@
             const wins = parseInt(document.getElementById('wins').value);
             if(!team.length || isNaN(wins)) return alert("Add team and wins!");
             const history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            history.push({ team, wins, id: Date.now() });
+            history.push({ team, wins, id: generateUniqueId() });
             localStorage.setItem('bt_records', JSON.stringify(history));
             ['p1','p2','p3','p4','wins'].forEach(id => document.getElementById(id).value = '');
             updateDisplay();
         }
 
         function toggleEdit(id) { 
-            editingId = (editingId === id) ? null : id; 
+            // String comparison to be safe with mixed ID types during migration
+            const targetId = String(id);
+            editingId = (String(editingId) === targetId) ? null : targetId; 
             updateDisplay(); 
         }
 
-        // FIXED UPDATE LOGIC
         function updateEntry(id, index, newName) {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            const runIndex = history.findIndex(r => r.id === id);
+            const runIndex = history.findIndex(r => String(r.id) === String(id));
             
             if (runIndex > -1) {
                 history[runIndex].team[index] = newName.trim();
                 localStorage.setItem('bt_records', JSON.stringify(history));
-                // We don't call updateDisplay here to avoid losing input focus while typing
             }
         }
 
         function deleteRun(id) {
             if(!confirm("Delete this run?")) return;
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            history = history.filter(r => r.id !== id);
+            history = history.filter(r => String(r.id) !== String(id));
             localStorage.setItem('bt_records', JSON.stringify(history));
-            if(editingId === id) editingId = null;
+            if(String(editingId) === String(id)) editingId = null;
             updateDisplay();
         }
 
@@ -260,16 +285,16 @@
             else displayHistory.sort((a, b) => b.wins - a.wins);
 
             document.getElementById('historyList').innerHTML = displayHistory.map(run => {
-                const isEditing = (editingId === run.id);
+                const isEditing = (String(editingId) === String(run.id));
                 return `
                 <div class="history-item">
                     <div class="history-header"><strong>${run.wins} Wins</strong>
-                        <div><button class="btn-small" onclick="toggleEdit(${run.id})">${isEditing?'Save':'Edit'}</button>
-                        <button class="btn-small" style="background:#e74c3c" onclick="deleteRun(${run.id})">Del</button></div>
+                        <div><button class="btn-small" onclick="toggleEdit('${run.id}')">${isEditing?'Save':'Edit'}</button>
+                        <button class="btn-small" style="background:#e74c3c" onclick="deleteRun('${run.id}')">Del</button></div>
                     </div>
                     <div class="team-display ${isEditing?'hidden':''}">${run.team.join(' / ')}</div>
                     <div class="edit-row ${isEditing?'':'hidden'}">
-                        ${run.team.map((n, i) => `<input type="text" value="${n}" onchange="updateEntry(${run.id}, ${i}, this.value)">`).join('')}
+                        ${run.team.map((n, i) => `<input type="text" value="${n}" onchange="updateEntry('${run.id}', ${i}, this.value)">`).join('')}
                     </div>
                 </div>`;
             }).join('');
@@ -290,7 +315,7 @@
         }
         function importData() {
             const c = prompt("Paste backup code:");
-            if(c) { try { JSON.parse(c); localStorage.setItem('bt_records', c); updateDisplay(); } catch(e) { alert("Invalid code!"); } }
+            if(c) { try { JSON.parse(c); localStorage.setItem('bt_records', c); migrateOldIds(); updateDisplay(); } catch(e) { alert("Invalid code!"); } }
         }
         function clearData() { if(confirm("Permanently wipe all records?")) { localStorage.clear(); updateDisplay(); } }
     </script>
