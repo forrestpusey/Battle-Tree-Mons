@@ -26,7 +26,7 @@
         button { background: #3498db; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; }
         .save-btn { background: #27ae60; width: 100%; padding: 15px; margin-top: 10px; font-size: 1rem; }
         
-        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.55rem; padding: 4px 5px; border-radius: 4px; margin-left: 2px; text-transform: uppercase; }
+        .sort-btn { background: #f1f3f5; color: #666; font-size: 0.55rem; padding: 4px 5px; border-radius: 4px; margin-left: 2px; text-transform: uppercase; display: flex; align-items: center; gap: 2px; }
         .sort-btn.active { background: #3498db; color: white; }
         
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -34,14 +34,15 @@
         
         .poke-sprite { position: absolute; bottom: -2px; right: -2px; width: 50px; height: 50px; filter: drop-shadow(1px 1px 0px white); image-rendering: pixelated; }
         
-        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 5px; }
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: bold; text-transform: uppercase; margin-left: 3px; display: inline-block; }
         .badge-30 { background: #cd7f32; color: white; }
         .badge-40 { background: #bdc3c7; color: white; }
         .badge-50 { background: #f1c40f; color: black; }
         .badge-100 { background: #9b59b6; color: white; }
+        .badge-loyalty { background: #3498db; color: white; }
         
-        .badge-key { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; justify-content: center; }
-        .key-item { font-size: 0.6rem; color: #666; display: flex; align-items: center; }
+        .badge-key { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; justify-content: center; }
+        .key-item { font-size: 0.55rem; color: #666; display: flex; align-items: center; }
         
         .history-item { border-bottom: 2px solid #f0f2f5; padding: 15px 0; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
@@ -81,7 +82,8 @@
     <div id="leaderboard" class="tab-content active">
         <div class="card">
             <h2>Rankings
-                <div style="display: flex;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 2px;">
+                    <button class="sort-btn" id="sortName" onclick="setSort('name')">Name</button>
                     <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
                     <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Runs</button>
                     <button class="sort-btn" id="sortPeak" onclick="setSort('peak')">Peak</button>
@@ -93,6 +95,7 @@
                 <div class="key-item"><span class="badge badge-40">S</span> 40+</div>
                 <div class="key-item"><span class="badge badge-50">G</span> 50+</div>
                 <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
+                <div class="key-item"><span class="badge badge-loyalty">L</span> 5+ Runs</div>
             </div>
             <div id="statsList" class="stats-grid"></div>
         </div>
@@ -123,11 +126,12 @@
 
     <script>
         let currentSort = 'wins';
+        let sortDirection = -1; // -1 for desc, 1 for asc
         let currentHistorySort = 'date';
         let editingId = null;
 
         window.onload = function() {
-            migrateOldIds(); // Patch old data that might have duplicate IDs
+            migrateOldIds();
             updateDisplay();
         };
 
@@ -144,17 +148,14 @@
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        // Generate a truly unique ID
         function generateUniqueId() {
             return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
         }
 
-        // This ensures old data with duplicate timestamps gets unique IDs
         function migrateOldIds() {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             let seenIds = new Set();
             let changed = false;
-
             history.forEach(run => {
                 if (!run.id || seenIds.has(run.id)) {
                     run.id = generateUniqueId();
@@ -162,7 +163,6 @@
                 }
                 seenIds.add(run.id);
             });
-
             if (changed) localStorage.setItem('bt_records', JSON.stringify(history));
         }
 
@@ -174,10 +174,19 @@
         }
 
         function setSort(type) {
-            currentSort = type;
+            if (currentSort === type) {
+                sortDirection *= -1;
+            } else {
+                currentSort = type;
+                sortDirection = (type === 'name') ? 1 : -1;
+            }
+            
             document.querySelectorAll('#leaderboard .sort-btn').forEach(btn => btn.classList.remove('active'));
-            const ids = {'wins':'sortWins','runs':'sortRuns','peak':'sortPeak','ratio':'sortRatio'};
-            document.getElementById(ids[type]).classList.add('active');
+            const ids = {'name':'sortName','wins':'sortWins','runs':'sortRuns','peak':'sortPeak','ratio':'sortRatio'};
+            const activeBtn = document.getElementById(ids[type]);
+            activeBtn.classList.add('active');
+            activeBtn.innerHTML = type.charAt(0).toUpperCase() + type.slice(1) + (sortDirection === 1 ? ' ↑' : ' ↓');
+            
             updateDisplay();
         }
 
@@ -201,7 +210,6 @@
         }
 
         function toggleEdit(id) { 
-            // String comparison to be safe with mixed ID types during migration
             const targetId = String(id);
             editingId = (String(editingId) === targetId) ? null : targetId; 
             updateDisplay(); 
@@ -210,7 +218,6 @@
         function updateEntry(id, index, newName) {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             const runIndex = history.findIndex(r => String(r.id) === String(id));
-            
             if (runIndex > -1) {
                 history[runIndex].team[index] = newName.trim();
                 localStorage.setItem('bt_records', JSON.stringify(history));
@@ -256,10 +263,13 @@
             document.getElementById('poke-list').innerHTML = Array.from(uniqueNames).map(n => `<option value="${n}">`).join('');
 
             const sortedStats = Object.keys(stats).sort((a,b) => {
-                if(currentSort === 'wins') return stats[b].wins - stats[a].wins;
-                if(currentSort === 'runs') return stats[b].runs - stats[a].runs;
-                if(currentSort === 'peak') return stats[b].max - stats[a].max;
-                return calculateRating(stats[b].wins, stats[b].runs) - calculateRating(stats[a].wins, stats[a].runs);
+                let res = 0;
+                if(currentSort === 'name') res = a.toLowerCase().localeCompare(b.toLowerCase());
+                else if(currentSort === 'wins') res = stats[a].wins - stats[b].wins;
+                else if(currentSort === 'runs') res = stats[a].runs - stats[b].runs;
+                else if(currentSort === 'peak') res = stats[a].max - stats[b].max;
+                else res = calculateRating(stats[a].wins, stats[a].runs) - calculateRating(stats[b].wins, stats[b].runs);
+                return res * sortDirection;
             });
 
             document.getElementById('statsList').innerHTML = sortedStats.map((name, index) => {
@@ -273,7 +283,7 @@
                         <span class="rank-number">#${index + 1}</span> ${name}
                     </div>
                     <div style="font-size:0.65rem;">Wins: <strong>${stats[name].wins}</strong></div>
-                    <div style="font-size:0.65rem;">Peak: <strong>${stats[name].max}</strong> ${getBadge(stats[name].max)}</div>
+                    <div style="font-size:0.65rem;">Peak: <strong>${stats[name].max}</strong> ${getBadges(stats[name].max, stats[name].runs)}</div>
                     <div style="font-size:0.65rem; color:#888;">Runs: ${stats[name].runs}</div>
                     <img class="poke-sprite" src="https://img.pokemondb.net/sprites/sun-moon/icon/${species}.png" onerror="this.style.display='none'">
                 </div>
@@ -300,12 +310,15 @@
             }).join('');
         }
 
-        function getBadge(m) {
-            if(m >= 100) return '<span class="badge badge-100">D</span>';
-            if(m >= 50) return '<span class="badge badge-50">G</span>';
-            if(m >= 40) return '<span class="badge badge-40">S</span>';
-            if(m >= 30) return '<span class="badge badge-30">B</span>';
-            return '';
+        function getBadges(max, runs) {
+            let badges = '';
+            if(max >= 100) badges += '<span class="badge badge-100">D</span>';
+            else if(max >= 50) badges += '<span class="badge badge-50">G</span>';
+            else if(max >= 40) badges += '<span class="badge badge-40">S</span>';
+            else if(max >= 30) badges += '<span class="badge badge-30">B</span>';
+            
+            if(runs >= 5) badges += '<span class="badge badge-loyalty">L</span>';
+            return badges;
         }
 
         function exportData() {
