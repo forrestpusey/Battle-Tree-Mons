@@ -74,12 +74,19 @@
     </div>
 
     <div class="card">
-        <h2>History</h2>
+        <h2>
+            History
+            <div>
+                <button class="sort-btn active" id="sortDateHist" onclick="setHistorySort('date')">Recent</button>
+                <button class="sort-btn" id="sortWinHist" onclick="setHistorySort('wins')">Highest</button>
+            </div>
+        </h2>
         <div id="historyList"></div>
     </div>
 
     <script>
         let currentSort = 'wins';
+        let currentHistorySort = 'date';
         let editingId = null;
 
         window.onload = updateDisplay;
@@ -89,6 +96,13 @@
             document.getElementById('sortWins').classList.toggle('active', type === 'wins');
             document.getElementById('sortRuns').classList.toggle('active', type === 'runs');
             document.getElementById('sortPeak').classList.toggle('active', type === 'peak');
+            updateDisplay();
+        }
+
+        function setHistorySort(type) {
+            currentHistorySort = type;
+            document.getElementById('sortDateHist').classList.toggle('active', type === 'date');
+            document.getElementById('sortWinHist').classList.toggle('active', type === 'wins');
             updateDisplay();
         }
 
@@ -129,11 +143,11 @@
         }
 
         function updateDisplay() {
-            const history = JSON.parse(localStorage.getItem('bt_records')) || [];
+            const historyData = JSON.parse(localStorage.getItem('bt_records')) || [];
             const stats = {};
             const uniqueNames = new Set();
 
-            history.forEach(run => {
+            historyData.forEach(run => {
                 run.team.forEach(name => {
                     if(!name) return;
                     uniqueNames.add(name);
@@ -146,13 +160,13 @@
 
             document.getElementById('poke-list').innerHTML = Array.from(uniqueNames).map(n => `<option value="${n}">`).join('');
 
-            const sorted = Object.keys(stats).sort((a,b) => {
+            const sortedStats = Object.keys(stats).sort((a,b) => {
                 if(currentSort === 'wins') return stats[b].wins - stats[a].wins;
                 if(currentSort === 'runs') return stats[b].runs - stats[a].runs;
                 return stats[b].max - stats[a].max;
             });
 
-            document.getElementById('statsList').innerHTML = sorted.map(name => `
+            document.getElementById('statsList').innerHTML = sortedStats.map(name => `
                 <div class="stat-box">
                     <div style="font-weight:bold; font-size:0.85rem; border-bottom: 1px solid #ddd; margin-bottom: 5px;">${name}</div>
                     <div style="font-size:0.7rem;">Total Wins: <strong>${stats[name].wins}</strong></div>
@@ -161,7 +175,15 @@
                 </div>
             `).join('');
 
-            document.getElementById('historyList').innerHTML = history.slice().reverse().map(run => {
+            // History Sorting Logic
+            const displayHistory = [...historyData];
+            if (currentHistorySort === 'date') {
+                displayHistory.reverse(); // Newest (latest ID) first
+            } else {
+                displayHistory.sort((a, b) => b.wins - a.wins); // Highest wins first
+            }
+
+            document.getElementById('historyList').innerHTML = displayHistory.map(run => {
                 const isEditing = (editingId === run.id);
                 return `
                 <div class="history-item">
