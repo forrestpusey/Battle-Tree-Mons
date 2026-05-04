@@ -5,99 +5,116 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Battle Tree Tracker</title>
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; padding: 20px; color: #333; }
-        .card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        h2 { margin-top: 0; color: #2c3e50; font-size: 1.2rem; }
-        input { width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #e74c3c; color: white; border: none; padding: 12px; border-radius: 4px; width: 100%; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .record-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 0.9rem; }
+        body { font-family: -apple-system, sans-serif; background: #f0f2f5; padding: 15px; color: #333; }
+        .card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        h2 { margin-top: 0; color: #2c3e50; font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 8px; }
+        label { font-size: 0.8rem; font-weight: bold; color: #7f8c8d; }
+        input { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 1rem; }
+        button { background: #3498db; color: white; border: none; padding: 15px; border-radius: 8px; width: 100%; cursor: pointer; font-weight: bold; font-size: 1rem; }
+        .save-btn { background: #27ae60; }
+        .stat-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-left: 4px solid #3498db; }
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: #ecf0f1; padding: 10px; border-radius: 4px; text-align: center; }
-        .optional { background: #fffdf0; }
+        .record-item { border-bottom: 1px solid #eee; padding: 10px 0; }
+        datalist { display: none; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <h2>Add New Run</h2>
-        <input type="text" id="p1" placeholder="Pokémon 1">
-        <input type="text" id="p2" placeholder="Pokémon 2">
-        <input type="text" id="p3" placeholder="Pokémon 3">
-        <input type="text" id="p4" class="optional" placeholder="Pokémon 4 (Optional)">
-        <input type="number" id="wins" placeholder="Total Wins">
-        <button onclick="saveRun()">Save Run</button>
+        <h2>New Battle Tree Run</h2>
+        
+        <label>Team Members</label>
+        <!-- The "list" attribute connects the input to the datalist below -->
+        <input type="text" id="p1" list="poke-list" placeholder="Pokémon 1">
+        <input type="text" id="p2" list="poke-list" placeholder="Pokémon 2">
+        <input type="text" id="p3" list="poke-list" placeholder="Pokémon 3">
+        <input type="text" id="p4" list="poke-list" placeholder="Pokémon 4 (Optional)">
+        
+        <label>Performance</label>
+        <input type="number" id="wins" placeholder="Total Wins reached">
+        
+        <button class="save-btn" onclick="saveRun()">Save Record</button>
+        
+        <!-- This is the "Registry" that stores your previous names -->
+        <datalist id="poke-list"></datalist>
     </div>
 
     <div class="card">
-        <h2>Individual Pokémon Stats</h2>
+        <h2>Top Performers</h2>
         <div id="statsList" class="stats-grid"></div>
     </div>
 
     <div class="card">
         <h2>History</h2>
         <div id="historyList"></div>
-        <button onclick="clearData()" style="background:#95a5a6; font-size: 0.7rem; margin-top: 20px;">Clear All Data</button>
+        <button onclick="clearData()" style="background:none; color:#95a5a6; font-size: 0.7rem; margin-top: 20px;">Clear All Data</button>
     </div>
 
     <script>
         window.onload = updateDisplay;
 
         function saveRun() {
-            const p1 = document.getElementById('p1').value.trim();
-            const p2 = document.getElementById('p2').value.trim();
-            const p3 = document.getElementById('p3').value.trim();
-            const p4 = document.getElementById('p4').value.trim();
-            const wins = parseInt(document.getElementById('wins').value) || 0;
+            const inputs = ['p1', 'p2', 'p3', 'p4'];
+            const team = inputs.map(id => document.getElementById(id).value.trim()).filter(val => val !== "");
+            const wins = parseInt(document.getElementById('wins').value);
 
-            if(!p1 || !wins) return alert("Please enter at least one Pokémon and win count.");
-
-            const team = [p1, p2, p3];
-            if(p4) team.push(p4);
+            if(team.length < 1 || isNaN(wins)) {
+                alert("Please enter at least one Pokémon and your win count!");
+                return;
+            }
 
             const run = { team, wins, date: new Date().toLocaleDateString() };
-
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             history.push(run);
             localStorage.setItem('bt_records', JSON.stringify(history));
             
-            document.querySelectorAll('input').forEach(i => i.value = '');
+            inputs.forEach(id => document.getElementById(id).value = '');
+            document.getElementById('wins').value = '';
             updateDisplay();
         }
 
         function updateDisplay() {
             const history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            
-            // Update History List
             const list = document.getElementById('historyList');
-            list.innerHTML = history.map(run => `
+            const statsList = document.getElementById('statsList');
+            const dataList = document.getElementById('poke-list');
+            
+            // 1. Update History
+            list.innerHTML = history.slice().reverse().map(run => `
                 <div class="record-item">
-                    <strong>${run.wins} Wins</strong> - ${run.team.join(', ')}
+                    <strong>${run.wins} Wins</strong><br>
+                    <small>${run.team.join(' / ')}</small>
                 </div>
-            `).reverse().join('');
+            `).join('');
 
-            // Update Individual Stats
+            // 2. Calculate Stats & Build Registry
             const stats = {};
+            const uniqueNames = new Set();
+
             history.forEach(run => {
                 run.team.forEach(name => {
-                    const poke = name.toLowerCase().trim();
-                    if(!stats[poke]) stats[poke] = { totalWins: 0, appearances: 0 };
-                    stats[poke].totalWins += run.wins;
-                    stats[poke].appearances += 1;
+                    uniqueNames.add(name);
+                    if(!stats[name]) stats[name] = { totalWins: 0, runs: 0 };
+                    stats[name].totalWins += run.wins;
+                    stats[name].runs += 1;
                 });
             });
 
-            const statsList = document.getElementById('statsList');
+            // 3. Update the Dropdown Menu (Datalist)
+            dataList.innerHTML = Array.from(uniqueNames).map(name => `<option value="${name}">`).join('');
+
+            // 4. Display Stats
             statsList.innerHTML = Object.keys(stats).map(name => `
                 <div class="stat-box">
-                    <div style="text-transform: capitalize; font-weight: bold;">${name}</div>
-                    <div style="font-size: 0.8rem;">Wins: ${stats[name].totalWins}</div>
-                    <div style="font-size: 0.8rem;">Runs: ${stats[name].appearances}</div>
+                    <div style="font-weight: bold; color: #2c3e50;">${name}</div>
+                    <div style="font-size: 0.8rem;">Total Wins: ${stats[name].totalWins}</div>
+                    <div style="font-size: 0.8rem;">Runs: ${stats[name].runs}</div>
                 </div>
             `).join('');
         }
 
         function clearData() {
-            if(confirm("Delete all records?")) {
+            if(confirm("Are you sure? This deletes all your Battle Tree history!")) {
                 localStorage.clear();
                 updateDisplay();
             }
