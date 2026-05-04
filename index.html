@@ -20,6 +20,8 @@
         .badge-40 { background: #bdc3c7; color: white; }
         .badge-50 { background: #f1c40f; color: black; }
         .badge-100 { background: #9b59b6; color: white; }
+        .badge-key { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; padding: 8px; background: #fdfdfd; border: 1px solid #eee; border-radius: 8px; }
+        .key-item { font-size: 0.65rem; color: #666; display: flex; align-items: center; }
         .history-item { border-bottom: 2px solid #f0f2f5; padding: 15px 0; }
         .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
         .team-display { font-size: 0.9rem; color: #555; line-height: 1.4; }
@@ -59,6 +61,14 @@
                 <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Usage</button>
             </div>
         </h2>
+        
+        <div class="badge-key">
+            <div class="key-item"><span class="badge badge-30">B</span> 30+</div>
+            <div class="key-item"><span class="badge badge-40">S</span> 40+</div>
+            <div class="key-item"><span class="badge badge-50">G</span> 50+</div>
+            <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
+        </div>
+
         <div id="statsList" class="stats-grid"></div>
     </div>
 
@@ -94,6 +104,7 @@
         }
 
         function toggleEdit(id) {
+            // If clicking the same one, close it. Otherwise, open just this one.
             editingId = (editingId === id) ? null : id;
             updateDisplay();
         }
@@ -104,7 +115,7 @@
             if (runIndex > -1) {
                 history[runIndex].team[index] = newName.trim();
                 localStorage.setItem('bt_records', JSON.stringify(history));
-                // Don't close edit mode here so user can finish multiple slots
+                // We keep editingId active so the keyboard doesn't close while typing multiple slots
             }
         }
 
@@ -113,6 +124,7 @@
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             history = history.filter(r => r.id !== id);
             localStorage.setItem('bt_records', JSON.stringify(history));
+            if(editingId === id) editingId = null;
             updateDisplay();
         }
 
@@ -148,7 +160,7 @@
             `).join('');
 
             document.getElementById('historyList').innerHTML = history.slice().reverse().map(run => {
-                const isEditing = editingId === run.id;
+                const isEditing = (editingId === run.id);
                 return `
                 <div class="history-item">
                     <div class="history-header">
@@ -183,12 +195,21 @@
 
         function exportData() {
             const d = localStorage.getItem('bt_records');
+            if(!d) return alert("Nothing to backup yet!");
             navigator.clipboard.writeText(d).then(() => alert("Backup copied!"));
         }
 
         function importData() {
             const c = prompt("Paste backup code:");
-            if(c) { localStorage.setItem('bt_records', c); updateDisplay(); }
+            if(c) { 
+                try {
+                    JSON.parse(c);
+                    localStorage.setItem('bt_records', c); 
+                    updateDisplay();
+                } catch(e) {
+                    alert("Invalid code!");
+                }
+            }
         }
 
         function clearData() { if(confirm("Wipe everything?")) { localStorage.clear(); updateDisplay(); } }
