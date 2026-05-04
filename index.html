@@ -31,6 +31,7 @@
         .tools button { flex: 1; font-size: 0.7rem; background: #34495e; }
         .hidden { display: none; }
         .rating-chip { position: absolute; top: 5px; right: 5px; font-size: 0.6rem; background: #e8f4fd; color: #3498db; padding: 2px 4px; border-radius: 4px; font-weight: bold; }
+        .rank-number { color: #999; font-size: 0.7rem; margin-right: 4px; }
     </style>
 </head>
 <body>
@@ -174,12 +175,14 @@
                 return calculateRating(stats[b].wins, stats[b].runs) - calculateRating(stats[a].wins, stats[a].runs);
             });
 
-            document.getElementById('statsList').innerHTML = sortedStats.map(name => {
+            document.getElementById('statsList').innerHTML = sortedStats.map((name, index) => {
                 const rating = calculateRating(stats[name].wins, stats[name].runs).toFixed(1);
                 return `
                 <div class="stat-box">
                     <span class="rating-chip">R: ${rating}</span>
-                    <div style="font-weight:bold; font-size:0.85rem; border-bottom: 1px solid #ddd; margin-bottom: 5px; padding-right: 35px;">${name}</div>
+                    <div style="font-weight:bold; font-size:0.85rem; border-bottom: 1px solid #ddd; margin-bottom: 5px; padding-right: 35px; display: flex; align-items: center;">
+                        <span class="rank-number">#${index + 1}</span> ${name}
+                    </div>
                     <div style="font-size:0.7rem;">Total Wins: <strong>${stats[name].wins}</strong></div>
                     <div style="font-size:0.7rem;">Peak Streak: <strong>${stats[name].max}</strong> ${getBadge(stats[name].max)}</div>
                     <div style="font-size:0.7rem; color:#888;">Runs: ${stats[name].runs}</div>
