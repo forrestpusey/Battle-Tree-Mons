@@ -24,7 +24,7 @@
         
         h2 { font-size: 1rem; margin: 0 0 12px 0; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Hall of Fame Styles */
+        /* Hall of Fame */
         .hof-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .hof-slot { background: #1e293b; color: white; padding: 10px 5px; border-radius: 10px; text-align: center; border: 1px solid #fbbf24; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .hof-rank { font-size: 0.6rem; color: #fbbf24; font-weight: 900; display: block; margin-bottom: 2px; }
@@ -37,7 +37,6 @@
         button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; }
         .btn-main { width: 100%; background: var(--primary); color: white; padding: 12px; margin-top: 10px; }
         .btn-edit { background: #f1f5f9; color: #475569; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #cbd5e1; }
-        .btn-del { background: #fee2e2; color: #ef4444; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #fecaca; }
 
         .tabs { display: flex; gap: 5px; margin: 15px 0; background: #e2e8f0; padding: 4px; border-radius: 10px; }
         .tab-btn { flex: 1; padding: 8px; background: none; font-size: 0.8rem; color: #64748b; }
@@ -46,16 +45,17 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; margin-right: 4px; display: inline-block; }
-        .badge-30 { background: #d97706; }
-        .badge-40 { background: #94a3b8; }
-        .badge-60 { background: #fbbf24; color: #78350f; }
-        .badge-100 { background: #a855f7; }
+        /* BADGES - Fixed Logic */
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; margin-right: 4px; display: inline-block; margin-top: 4px; }
+        .badge-30 { background: #d97706; } /* Bronze */
+        .badge-40 { background: #94a3b8; } /* Silver */
+        .badge-60 { background: #fbbf24; color: #78350f; } /* Gold */
+        .badge-100 { background: #a855f7; } /* Diamond */
         .badge-vet { background: #6366f1; }
         .badge-ace { background: #10b981; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 85px; }
+        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 90px; }
         
         .border-diamond { border-color: var(--brd-diamond); }
         .border-gold { border-color: var(--brd-gold); }
@@ -67,7 +67,6 @@
 </head>
 <body>
 
-    <!-- INPUT UI -->
     <div class="card">
         <h2 id="form-title">Record Run</h2>
         <div class="input-grid">
@@ -82,21 +81,18 @@
         </div>
     </div>
 
-    <!-- TABS -->
     <div class="tabs">
         <button class="tab-btn active" id="btn-rank" onclick="switchTab('rank', this)">Rankings</button>
         <button class="tab-btn" id="btn-hist" onclick="switchTab('hist', this)">History</button>
         <button class="tab-btn" id="btn-util" onclick="switchTab('util', this)">Settings</button>
     </div>
 
-    <!-- RANKINGS TAB -->
     <div id="rank" class="tab-content active">
-        <!-- HALL OF FAME -->
-        <h3 style="font-size: 0.8rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em;">Hall of Fame (Top 6)</h3>
+        <h3 style="font-size: 0.75rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame (Top 6)</h3>
         <div class="hof-container" id="hof-list"></div>
 
         <div class="card" style="padding:10px;">
-            <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search name..." oninput="updateDisplay()">
+            <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search Pokémon..." oninput="updateDisplay()">
             <div class="input-grid">
                 <select id="sortSelect" onchange="updateDisplay()">
                     <option value="wins">Total Wins</option>
@@ -104,26 +100,31 @@
                 </select>
                 <select id="filterSelect" onchange="updateDisplay()">
                     <option value="all">All</option>
-                    <option value="badge-100">Diamond</option>
+                    <option value="badge-100">Diamond Only</option>
                 </select>
             </div>
         </div>
         <div class="stats-grid" id="statsList"></div>
     </div>
 
-    <!-- HISTORY TAB -->
     <div id="hist" class="tab-content">
         <div id="historyList"></div>
     </div>
 
-    <!-- SETTINGS TAB -->
     <div id="util" class="tab-content">
         <div class="card">
-            <h2>Badge Rules (New)</h2>
-            <p style="font-size:0.8rem;"><b>Silver:</b> 40-59 Max Streak<br><b>Gold:</b> 60-99 Max Streak</p>
-            <hr style="border:0; border-top:1px solid #eee; margin:10px 0;">
-            <textarea id="importBox" style="width:100%; height:80px; margin-bottom:10px;" placeholder="Paste JSON here..."></textarea>
-            <button class="btn-main" onclick="importData()" style="background:var(--accent);">Import JSON</button>
+            <h2>System Rules</h2>
+            <ul style="font-size: 0.8rem; line-height: 1.5;">
+                <li><b>Diamond:</b> 100+ Max</li>
+                <li><b>Gold:</b> 60-99 Max</li>
+                <li><b>Silver:</b> 40-59 Max</li>
+                <li><b>Bronze:</b> 30-39 Max</li>
+                <li><b>Veteran (★):</b> 6+ Registered Runs</li>
+                <li><b>Ace (A):</b> Rating 45+ & 3+ Runs</li>
+            </ul>
+            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+            <textarea id="importBox" style="width:100%; height:60px;" placeholder="JSON Data..."></textarea>
+            <button class="btn-main" onclick="importData()" style="background:var(--accent);">Import</button>
             <button class="btn-main" style="background:#64748b;" onclick="exportData()">Copy Backup</button>
             <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe Data</button>
         </div>
@@ -175,7 +176,7 @@
                 });
             });
 
-            // HANDLE HALL OF FAME (Top 6 by Wins)
+            // Hall of Fame calculation
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
                 <div class="hof-slot">
@@ -185,11 +186,9 @@
                 </div>
             `).join('');
 
-            // HANDLE MAIN LIST
             let sortedNames = Object.keys(stats).filter(name => {
-                const s = stats[name];
                 if(searchQuery && !name.toLowerCase().includes(searchQuery)) return false;
-                if(filterVal === 'badge-100') return s.max >= 100;
+                if(filterVal === 'badge-100') return stats[name].max >= 100;
                 return true;
             });
 
@@ -209,23 +208,26 @@
                 let bc = "";
                 let badges = "";
 
-                // NEW BADGE LOGIC
+                // 1. Streak Badges (Independent)
                 if(s.max >= 100) { bc = "border-diamond"; badges += '<span class="badge badge-100">D</span>'; }
                 else if(s.max >= 60) { bc = "border-gold"; badges += '<span class="badge badge-60">G</span>'; }
                 else if(s.max >= 40) { badges += '<span class="badge badge-40">S</span>'; }
                 else if(s.max >= 30) { badges += '<span class="badge badge-30">B</span>'; }
                 
+                // 2. Performance Badges (Independent)
                 if(s.runs >= 6) badges += '<span class="badge badge-vet">★</span>';
-                if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; badges += '<span class="badge badge-ace">A</span>'; }
+                if(rat >= 45 && s.runs >= 3) { 
+                    if(!bc) bc = "border-ace"; // Use Ace border only if no Gold/Diamond border
+                    badges += '<span class="badge badge-ace">A</span>'; 
+                }
 
                 return `<div class="stat-box ${bc}">
                     <span class="rating-tag">${rat.toFixed(1)}</span>
                     <div style="font-weight:800; font-size:0.8rem;">${name}</div>
                     <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">
-                        Wins: <b>${s.wins}</b> | Peak: <b>${s.max}</b><br>
-                        Runs: <b>${s.runs}</b>
+                        W: <b>${s.wins}</b> | P: <b>${s.max}</b> | R: <b>${s.runs}</b>
                     </div>
-                    <div style="margin-top:5px;">${badges}</div>
+                    <div>${badges}</div>
                 </div>`;
             }).join('');
 
@@ -233,7 +235,7 @@
                 <div class="card" style="padding:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
-                        <div><button class="btn-edit" onclick="startEdit(${run.i})">Edit</button></div>
+                        <button class="btn-edit" onclick="startEdit(${run.i})">Edit</button>
                     </div>
                     <div style="font-size:0.8rem; margin-top:6px; color:#475569;">${run.team.join(' • ')}</div>
                 </div>`).join('');
