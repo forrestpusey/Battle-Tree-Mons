@@ -15,6 +15,8 @@
             --brd-diamond: #a855f7;
             --brd-gold: #fbbf24;
             --brd-ace: #10b981;
+            --specialist: #2dd4bf;
+            --legacy: #1e293b;
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px 15px 80px 15px; color: #1e293b; }
@@ -22,7 +24,6 @@
         
         h2 { font-size: 1rem; margin: 0 0 12px 0; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Hall of Fame */
         .hof-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .hof-slot { background: #1e293b; color: white; padding: 10px 5px; border-radius: 10px; text-align: center; border: 1px solid #fbbf24; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .hof-rank { font-size: 0.55rem; color: #fbbf24; font-weight: 900; display: block; }
@@ -43,7 +44,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* Badges */
         .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; display: inline-block; margin-right: 3px; }
         .badge-30 { background: #d97706; }
         .badge-40 { background: #94a3b8; }
@@ -51,6 +51,8 @@
         .badge-100 { background: #a855f7; }
         .badge-vet { background: #6366f1; }
         .badge-ace { background: #10b981; }
+        .badge-spec { background: var(--specialist); }
+        .badge-leg { background: var(--legacy); }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 90px; }
@@ -61,7 +63,6 @@
 
         .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
         .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
-        
         .guide-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
     </style>
 </head>
@@ -87,7 +88,6 @@
         <button class="tab-btn" onclick="switchTab('util', this)">Settings/Guides</button>
     </div>
 
-    <!-- RANKINGS -->
     <div id="rank" class="tab-content active">
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
@@ -110,28 +110,29 @@
                     <option value="bronze">Bronze (30+)</option>
                     <option value="ace">Aces (45+ R)</option>
                     <option value="vet">Veterans (6+ Runs)</option>
+                    <option value="spec">Specialists (Peak 15-29)</option>
+                    <option value="leg">Legacy (Peak < 15)</option>
                 </select>
             </div>
         </div>
         <div class="stats-grid" id="statsList"></div>
     </div>
 
-    <!-- HISTORY -->
     <div id="hist" class="tab-content">
         <div id="historyList"></div>
     </div>
 
-    <!-- SETTINGS & GUIDES -->
     <div id="util" class="tab-content">
         <div class="card">
             <h2>Badge Definitions</h2>
-            <div class="guide-row"><span class="badge badge-100">D</span> <b>Diamond:</b> Max streak of 100+</div>
-            <div class="guide-row"><span class="badge badge-60">G</span> <b>Gold:</b> Max streak of 60 - 99</div>
-            <div class="guide-row"><span class="badge badge-40">S</span> <b>Silver:</b> Max streak of 40 - 59</div>
-            <div class="guide-row"><span class="badge badge-30">B</span> <b>Bronze:</b> Max streak of 30 - 39</div>
+            <div class="guide-row"><span class="badge badge-100">D</span> <b>Diamond:</b> Max streak 100+</div>
+            <div class="guide-row"><span class="badge badge-60">G</span> <b>Gold:</b> Max streak 60 - 99</div>
+            <div class="guide-row"><span class="badge badge-40">S</span> <b>Silver:</b> Max streak 40 - 59</div>
+            <div class="guide-row"><span class="badge badge-30">B</span> <b>Bronze:</b> Max streak 30 - 39</div>
+            <div class="guide-row"><span class="badge badge-spec">S</span> <b>Specialist:</b> Peak streak 15 - 29</div>
+            <div class="guide-row"><span class="badge badge-leg">L</span> <b>Legacy:</b> Peak streak under 15</div>
             <div class="guide-row"><span class="badge badge-ace">A</span> <b>Ace:</b> Rating 45+ and 3+ runs</div>
             <div class="guide-row"><span class="badge badge-vet">★</span> <b>Veteran:</b> 6+ registered runs</div>
-            <p style="font-size:0.75rem; color:#64748b; margin-top:10px;"><i>*Rating is calculated using Wins, Runs, and a logarithmic consistency bonus.</i></p>
         </div>
 
         <div class="card">
@@ -203,9 +204,11 @@
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 if(searchQuery && !name.toLowerCase().includes(searchQuery)) return false;
                 if(filterVal === 'diamond') return s.max >= 100;
-                if(filterVal === 'gold') return s.max >= 60;
-                if(filterVal === 'silver') return s.max >= 40;
-                if(filterVal === 'bronze') return s.max >= 30;
+                if(filterVal === 'gold') return s.max >= 60 && s.max < 100;
+                if(filterVal === 'silver') return s.max >= 40 && s.max < 60;
+                if(filterVal === 'bronze') return s.max >= 30 && s.max < 40;
+                if(filterVal === 'spec') return s.max >= 15 && s.max < 30;
+                if(filterVal === 'leg') return s.max < 15;
                 if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
                 if(filterVal === 'vet') return s.runs >= 6;
                 return true;
@@ -232,6 +235,8 @@
                 else if(s.max >= 60) { bc = "border-gold"; bTags += '<span class="badge badge-60">G</span>'; }
                 else if(s.max >= 40) { bTags += '<span class="badge badge-40">S</span>'; }
                 else if(s.max >= 30) { bTags += '<span class="badge badge-30">B</span>'; }
+                else if(s.max >= 15) { bTags += '<span class="badge badge-spec">S</span>'; }
+                else { bTags += '<span class="badge badge-leg">L</span>'; }
                 
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
                 if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
