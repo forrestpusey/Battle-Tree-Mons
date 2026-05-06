@@ -3,29 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Battle Tree Ultimate Pro</title>
+    <title>Battle Tree Ultimate: Restoration</title>
     <style>
         :root {
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
+            --bg: #f1f5f9;
+            --card: #ffffff;
             --primary: #3b82f6;
+            --accent: #10b981;
             --danger: #ef4444;
             --specialist: #2dd4bf;
             --legacy: #1e293b;
             --radius: 12px;
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); margin: 0; padding: 15px 15px 80px 15px; color: #1e293b; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px 15px 80px 15px; color: #1e293b; }
 
-        .card { background: var(--card-bg); padding: 15px; border-radius: var(--radius); margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card { background: var(--card); padding: 15px; border-radius: var(--radius); margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
         
         h2 { font-size: 1rem; margin: 0 0 12px 0; display: flex; justify-content: space-between; align-items: center; }
 
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
         
-        button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; transition: opacity 0.2s; }
-        .btn-main { width: 100%; background: #3b82f6; color: white; padding: 12px; margin-top: 10px; }
+        button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; }
+        .btn-main { width: 100%; background: var(--primary); color: white; padding: 12px; margin-top: 10px; }
+        .btn-edit { background: #f1f5f9; color: #475569; padding: 4px 8px; font-size: 0.7rem; margin-right: 4px; }
         .btn-del { background: #fee2e2; color: #ef4444; padding: 4px 8px; font-size: 0.7rem; }
 
         .tabs { display: flex; gap: 5px; margin: 15px 0; background: #e2e8f0; padding: 4px; border-radius: 10px; }
@@ -35,56 +37,96 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
+        /* RANKING GRID */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: white; padding: 10px; border-radius: 12px; border: 1px solid #e2e8f0; position: relative; min-height: 80px; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
-        .poke-icon { position: absolute; right: -5px; bottom: -5px; width: 50px; height: 50px; z-index: 1; image-rendering: pixelated; }
+        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; position: relative; min-height: 85px; }
         
-        .badge { font-size: 0.6rem; padding: 2px 4px; border-radius: 4px; color: white; font-weight: 900; margin-left: 2px; }
-        .rating-tag { position: absolute; top: 5px; right: 5px; font-size: 0.6rem; background: #eff6ff; color: #3b82f6; padding: 2px 5px; border-radius: 10px; border: 1px solid #dbeafe; z-index: 2; }
+        /* BADGES */
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; margin-left: 2px; }
+        .badge-30 { background: #d97706; }
+        .badge-40 { background: #94a3b8; }
+        .badge-50 { background: #fbbf24; color: #78350f; }
+        .badge-100 { background: #a855f7; }
+        .badge-vet { background: #6366f1; }
+        .badge-ace { background: #10b981; }
+        .badge-spec { background: var(--specialist); }
+        .badge-leg { background: var(--legacy); }
+
+        .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; }
+        
+        .badge-legend { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; padding: 10px; background: #fff; border-radius: 8px; font-size: 0.65rem; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>Record New Run</h2>
+    <div class="card" id="editor-ui">
+        <h2 id="form-title">Record Run</h2>
         <div class="input-grid">
-            <input type="text" id="p1" placeholder="Mon 1">
-            <input type="text" id="p2" placeholder="Mon 2">
-            <input type="text" id="p3" placeholder="Mon 3">
-            <input type="text" id="p4" placeholder="Mon 4 (Opt)">
+            <input type="text" id="p1" placeholder="Pokémon 1">
+            <input type="text" id="p2" placeholder="Pokémon 2">
+            <input type="text" id="p3" placeholder="Pokémon 3">
+            <input type="text" id="p4" placeholder="Pokémon 4 (Opt)">
         </div>
-        <input type="number" id="wins" placeholder="Streak Number" style="margin-top:8px;">
-        <button class="btn-main" onclick="saveRun()">Register Entry</button>
+        <input type="number" id="wins" placeholder="Streak Wins" style="margin-top:8px;">
+        <div id="btn-container">
+            <button class="btn-main" onclick="saveRun()">Register Entry</button>
+        </div>
+    </div>
+
+    <div class="badge-legend card">
+        <strong>Key:</strong>
+        <span class="badge badge-30">B</span>30+ <span class="badge badge-40">S</span>40+ 
+        <span class="badge badge-50">G</span>50+ <span class="badge badge-100">D</span>100+ 
+        <span class="badge badge-vet">★</span>6+ Runs <span class="badge badge-ace">A</span>Ace 
+        <span class="badge badge-spec">⬥</span>9+ Partners <span class="badge badge-leg">L</span>500+ Wins
     </div>
 
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
         <button class="tab-btn" onclick="switchTab('hist', this)">History</button>
-        <button class="tab-btn" onclick="switchTab('util', this)">Settings/Import</button>
+        <button class="tab-btn" onclick="switchTab('util', this)">Settings</button>
     </div>
 
+    <!-- RANKINGS -->
     <div id="rank" class="tab-content active">
+        <div class="card" style="padding:10px; margin-bottom:10px;">
+            <div class="input-grid" style="grid-template-columns: 1.5fr 1fr;">
+                <select id="sortSelect" onchange="updateDisplay()">
+                    <option value="wins">Sort by Total Wins</option>
+                    <option value="name">Sort by Name</option>
+                    <option value="runs">Sort by Total Runs</option>
+                    <option value="ratio">Sort by Rating</option>
+                </select>
+                <select id="filterSelect" onchange="updateDisplay()">
+                    <option value="all">All Pokémon</option>
+                    <option value="ace">Aces Only</option>
+                    <option value="spec">Specialists</option>
+                    <option value="leg">Legacy</option>
+                </select>
+            </div>
+        </div>
         <div class="stats-grid" id="statsList"></div>
     </div>
 
+    <!-- HISTORY -->
     <div id="hist" class="tab-content">
         <div id="historyList"></div>
     </div>
 
+    <!-- UTILITIES -->
     <div id="util" class="tab-content">
         <div class="card">
-            <h3>Data Management</h3>
-            <p style="font-size:0.8rem; color:#64748b;">Paste your old JSON data below and click Import.</p>
-            <textarea id="importBox" style="width:100%; height:100px; border-radius:8px; border:1px solid #ccc; padding:10px; box-sizing:border-box;"></textarea>
-            <button class="btn-main" onclick="importData()" style="background:#10b981;">Import Data</button>
-            <button class="btn-main" onclick="exportData()" style="background:#64748b;">Copy Current Backup</button>
-            <button class="btn-main" onclick="clearAll()" style="background:#ef4444; margin-top:20px;">Wipe All Data</button>
+            <h3>Backup & Restore</h3>
+            <textarea id="importBox" style="width:100%; height:100px; margin-bottom:10px;" placeholder="Paste JSON here..."></textarea>
+            <button class="btn-main" onclick="importData()">Import JSON</button>
+            <button class="btn-main" style="background:#64748b;" onclick="exportData()">Copy Backup</button>
+            <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe Local Storage</button>
         </div>
     </div>
 
     <script>
-        // Storage Keys - Updated to match your main data
         const DB_KEY = 'bt_records_final';
+        let editId = null;
 
         window.onload = updateDisplay;
 
@@ -95,38 +137,53 @@
             btn.classList.add('active');
         }
 
-        // NEW ROBUST ICON LOGIC
-        function getIcon(name) {
-            if(!name) return "";
-            const clean = name.toLowerCase().trim()
-                .split('(')[0].trim() 
-                .replace(/[.\']/g, '')
-                .replace(/\s+/g, '-');
-            // Using a different, more reliable GitHub repo for icons
-            return `https://raw.githubusercontent.com/msikma/pokesprite/master/icons/pokemon/regular/${clean}.png`;
-        }
-
         function saveRun() {
-            const team = [
-                document.getElementById('p1').value,
-                document.getElementById('p2').value,
-                document.getElementById('p3').value,
-                document.getElementById('p4').value
-            ].map(v => v.trim()).filter(v => v);
-            
+            const team = [1,2,3,4].map(i => document.getElementById('p'+i).value.trim()).filter(v => v);
             const wins = parseInt(document.getElementById('wins').value);
-            if(!team.length || isNaN(wins)) return alert("Enter at least 1 Pokémon and the win count.");
+            if(!team.length || isNaN(wins)) return;
 
-            const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            data.push({ id: Date.now(), team, wins, date: new Date().toLocaleDateString() });
-            localStorage.setItem(DB_KEY, JSON.stringify(data));
+            let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
             
-            ['p1','p2','p3','p4','wins'].forEach(id => document.getElementById(id).value = '');
+            if(editId) {
+                data = data.map(r => r.id === editId ? { ...r, team, wins } : r);
+                editId = null;
+                document.getElementById('form-title').innerText = "Record Run";
+                document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
+            } else {
+                data.push({ id: Date.now(), team, wins, date: new Date().toLocaleDateString() });
+            }
+
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
+            document.getElementById('wins').value = '';
             updateDisplay();
         }
 
+        function startEdit(id) {
+            const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+            const run = data.find(r => r.id === id);
+            if(!run) return;
+
+            editId = id;
+            document.getElementById('form-title').innerText = "Editing Run...";
+            [1,2,3,4].forEach((i, idx) => document.getElementById('p'+i).value = run.team[idx] || '');
+            document.getElementById('wins').value = run.wins;
+            document.getElementById('btn-container').innerHTML = `
+                <button class="btn-main" style="background:#f59e0b" onclick="saveRun()">Update Run</button>
+                <button class="btn-main" style="background:#64748b; margin-top:5px;" onclick="cancelEdit()">Cancel</button>`;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function cancelEdit() {
+            editId = null;
+            document.getElementById('form-title').innerText = "Record Run";
+            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
+            document.getElementById('wins').value = '';
+            document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
+        }
+
         function deleteRun(id) {
-            if(!confirm("Delete this run?")) return;
+            if(!confirm("Delete this entry?")) return;
             let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
             data = data.filter(r => r.id !== id);
             localStorage.setItem(DB_KEY, JSON.stringify(data));
@@ -135,14 +192,8 @@
 
         function updateDisplay() {
             const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            const statsList = document.getElementById('statsList');
-            const historyList = document.getElementById('historyList');
-
-            if(data.length === 0) {
-                statsList.innerHTML = "<p style='grid-column:1/-1; text-align:center;'>No Data</p>";
-                historyList.innerHTML = "<p style='text-align:center;'>No History</p>";
-                return;
-            }
+            const sortVal = document.getElementById('sortSelect').value;
+            const filterVal = document.getElementById('filterSelect').value;
 
             const stats = {};
             data.forEach(run => {
@@ -155,52 +206,74 @@
                 });
             });
 
-            const sorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins);
-            
-            statsList.innerHTML = sorted.map(name => {
+            let sorted = Object.keys(stats).filter(name => {
                 const s = stats[name];
-                const rating = (s.wins / s.runs) * (1 + Math.log10(s.runs));
-                let b = "";
-                if(s.max >= 100) b += '<span class="badge" style="background:#a855f7">D</span>';
-                if(s.partners.size >= 9) b += '<span class="badge" style="background:#2dd4bf">⬥</span>';
-                if(s.wins >= 500) b += '<span class="badge" style="background:#1e293b">L</span>';
+                const r = (s.wins / s.runs) * (1 + Math.log10(s.runs));
+                if(filterVal === 'ace') return (r >= 45 && s.runs >= 3);
+                if(filterVal === 'spec') return s.partners.size >= 9;
+                if(filterVal === 'leg') return s.wins >= 500;
+                return true;
+            });
 
-                return `
-                <div class="stat-box">
-                    <span class="rating-tag">R: ${rating.toFixed(1)}</span>
-                    <div style="font-weight:800; font-size:0.75rem; z-index:2;">${name}</div>
-                    <div style="font-size:0.65rem; color:#64748b; z-index:2;">${s.wins} Wins ${b}</div>
-                    <img class="poke-icon" src="${getIcon(name)}" onerror="this.style.opacity='0'">
+            sorted.sort((a,b) => {
+                if(sortVal === 'name') return a.localeCompare(b);
+                if(sortVal === 'runs') return stats[b].runs - stats[a].runs;
+                if(sortVal === 'ratio') return ((stats[b].wins/stats[b].runs)*(1+Math.log10(stats[b].runs))) - ((stats[a].wins/stats[a].runs)*(1+Math.log10(stats[a].runs)));
+                return stats[b].wins - stats[a].wins;
+            });
+
+            document.getElementById('statsList').innerHTML = sorted.map(name => {
+                const s = stats[name];
+                const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
+                let b = "";
+                if(s.max >= 100) b += '<span class="badge badge-100">D</span>';
+                else if(s.max >= 50) b += '<span class="badge badge-50">G</span>';
+                else if(s.max >= 40) b += '<span class="badge badge-40">S</span>';
+                else if(s.max >= 30) b += '<span class="badge badge-30">B</span>';
+                if(s.runs >= 6) b += '<span class="badge badge-vet">★</span>';
+                if(rat >= 45 && s.runs >= 3) b += '<span class="badge badge-ace">A</span>';
+                if(s.partners.size >= 9) b += '<span class="badge badge-spec">⬥</span>';
+                if(s.wins >= 500) b += '<span class="badge badge-leg">L</span>';
+
+                return `<div class="stat-box">
+                    <span class="rating-tag">${rat.toFixed(1)}</span>
+                    <div style="font-weight:800; font-size:0.8rem;">${name}</div>
+                    <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">
+                        Wins: <b>${s.wins}</b> | Peak: <b>${s.max}</b><br>
+                        Runs: <b>${s.runs}</b> | Partners: <b>${s.partners.size}</b>
+                    </div>
+                    <div style="margin-top:5px;">${b}</div>
                 </div>`;
             }).join('');
 
-            historyList.innerHTML = [...data].reverse().map(run => `
+            document.getElementById('historyList').innerHTML = [...data].reverse().map(run => `
                 <div class="card" style="padding:10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:800; color:#3b82f6;">${run.wins} Wins</span>
-                        <button class="btn-del" onclick="deleteRun(${run.id})">Delete</button>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
+                        <div>
+                            <button class="btn-edit" onclick="startEdit(${run.id})">Edit</button>
+                            <button class="btn-del" onclick="deleteRun(${run.id})">Del</button>
+                        </div>
                     </div>
-                    <div style="font-size:0.8rem; margin-top:5px;">${run.team.join(' • ')}</div>
-                </div>
-            `).join('');
+                    <div style="font-size:0.8rem; margin-top:4px;">${run.team.join(' • ')}</div>
+                </div>`).join('');
         }
 
         function importData() {
-            const raw = document.getElementById('importBox').value;
             try {
+                const raw = document.getElementById('importBox').value;
                 const parsed = JSON.parse(raw);
                 if(Array.isArray(parsed)) {
                     localStorage.setItem(DB_KEY, raw);
                     updateDisplay();
-                    alert("Import successful!");
+                    alert("Data Imported!");
                 }
-            } catch(e) { alert("Invalid data format."); }
+            } catch(e) { alert("Invalid Format"); }
         }
 
         function exportData() {
-            const data = localStorage.getItem(DB_KEY);
-            navigator.clipboard.writeText(data || "[]");
-            alert("Backup copied to clipboard!");
+            navigator.clipboard.writeText(localStorage.getItem(DB_KEY) || '[]');
+            alert("Backup Copied!");
         }
 
         function clearAll() { if(confirm("WIPE EVERYTHING?")) { localStorage.clear(); updateDisplay(); } }
