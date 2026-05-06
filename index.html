@@ -74,9 +74,12 @@
         /* GRID & STATS */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-box { background: white; padding: 12px; border-radius: 14px; border: 1px solid #f1f5f9; position: relative; min-height: 100px; overflow: hidden; transition: 0.2s; }
-        .stat-box:hover { border-color: var(--primary); }
+        .stat-box:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
         .poke-sprite { position: absolute; bottom: -5px; right: -5px; width: 60px; height: 60px; image-rendering: pixelated; z-index: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1)); }
         
+        /* CROWN FOR RANK 1 */
+        .rank-1 { border: 2px solid #fbbf24 !important; background: linear-gradient(to bottom, #fffcf0, #fff) !important; }
+
         /* BADGES */
         .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; font-weight: 900; margin-left: 2px; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
         .badge-30 { background: #d97706; color: white; }
@@ -127,6 +130,7 @@
                         <option value="40">Silver Tier</option>
                         <option value="30">Bronze Tier</option>
                     </select>
+                    <button class="sort-btn" id="sortName" onclick="setSort('name')">Name</button>
                     <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
                     <button class="sort-btn" id="sortPeak" onclick="setSort('peak')">Peak</button>
                     <button class="sort-btn" id="sortRatio" onclick="setSort('ratio')">Rating</button>
@@ -189,9 +193,12 @@
 
         function setSort(type) {
             if (currentSort === type) sortDirection *= -1;
-            else { currentSort = type; sortDirection = -1; }
+            else { 
+                currentSort = type; 
+                sortDirection = (type === 'name') ? 1 : -1; 
+            }
             document.querySelectorAll('#leaderboard .sort-btn').forEach(btn => btn.classList.remove('active'));
-            const idMap = {'wins':'sortWins','peak':'sortPeak','ratio':'sortRatio'};
+            const idMap = {'name':'sortName', 'wins':'sortWins','peak':'sortPeak','ratio':'sortRatio'};
             document.getElementById(idMap[type]).classList.add('active');
             updateDisplay();
         }
@@ -285,6 +292,7 @@
                 }
                 return true;
             }).sort((a,b) => {
+                if(currentSort === 'name') return a.toLowerCase().localeCompare(b.toLowerCase()) * sortDirection;
                 if(currentSort === 'peak') return (stats[a].max - stats[b].max) * sortDirection;
                 if(currentSort === 'ratio') return (calculateRating(stats[a].wins, stats[a].runs) - calculateRating(stats[b].wins, stats[b].runs)) * sortDirection;
                 return (stats[a].wins - stats[b].wins) * sortDirection;
@@ -292,8 +300,9 @@
 
             document.getElementById('statsList').innerHTML = sortedStats.map((name, index) => {
                 const rat = calculateRating(stats[name].wins, stats[name].runs);
+                const isFirst = (index === 0 && currentSort !== 'name');
                 return `
-                <div class="stat-box">
+                <div class="stat-box ${isFirst ? 'rank-1' : ''}">
                     <span class="rating-chip">R: ${rat.toFixed(1)}</span>
                     <div style="font-weight:800; font-size:0.75rem; border-bottom: 1px solid #f1f5f9; margin-bottom: 6px; padding-right: 40px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <span class="rank-number">${index + 1}</span>${name}
