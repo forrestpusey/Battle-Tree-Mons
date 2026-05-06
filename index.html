@@ -104,14 +104,12 @@
                 </select>
                 <select id="filterSelect" onchange="updateDisplay()">
                     <option value="all">All Pokémon</option>
-                    <option value="diamond">Diamond (100+)</option>
-                    <option value="gold">Gold (60+)</option>
-                    <option value="silver">Silver (40+)</option>
-                    <option value="bronze">Bronze (30+)</option>
+                    <option value="diamond">Diamond (100+ Peak)</option>
+                    <option value="gold">Gold (60+ Peak)</option>
                     <option value="ace">Aces (45+ R)</option>
                     <option value="vet">Veterans (6+ Runs)</option>
-                    <option value="spec">Specialists (Peak 15-29)</option>
-                    <option value="leg">Legacy (Peak < 15)</option>
+                    <option value="spec">Specialists (12+ Partners)</option>
+                    <option value="leg">Legacy (500+ Total Wins)</option>
                 </select>
             </div>
         </div>
@@ -125,12 +123,12 @@
     <div id="util" class="tab-content">
         <div class="card">
             <h2>Badge Definitions</h2>
-            <div class="guide-row"><span class="badge badge-100">D</span> <b>Diamond:</b> Max streak 100+</div>
-            <div class="guide-row"><span class="badge badge-60">G</span> <b>Gold:</b> Max streak 60 - 99</div>
-            <div class="guide-row"><span class="badge badge-40">S</span> <b>Silver:</b> Max streak 40 - 59</div>
-            <div class="guide-row"><span class="badge badge-30">B</span> <b>Bronze:</b> Max streak 30 - 39</div>
-            <div class="guide-row"><span class="badge badge-spec">S</span> <b>Specialist:</b> Peak streak 15 - 29</div>
-            <div class="guide-row"><span class="badge badge-leg">L</span> <b>Legacy:</b> Peak streak under 15</div>
+            <div class="guide-row"><span class="badge badge-100">D</span> <b>Diamond:</b> Peak streak 100+</div>
+            <div class="guide-row"><span class="badge badge-60">G</span> <b>Gold:</b> Peak streak 60 - 99</div>
+            <div class="guide-row"><span class="badge badge-40">S</span> <b>Silver:</b> Peak streak 40 - 59</div>
+            <div class="guide-row"><span class="badge badge-30">B</span> <b>Bronze:</b> Peak streak 30 - 39</div>
+            <div class="guide-row"><span class="badge badge-spec">S</span> <b>Specialist:</b> 12+ Unique teammates</div>
+            <div class="guide-row"><span class="badge badge-leg">L</span> <b>Legacy:</b> 500+ Cumulative Wins</div>
             <div class="guide-row"><span class="badge badge-ace">A</span> <b>Ace:</b> Rating 45+ and 3+ runs</div>
             <div class="guide-row"><span class="badge badge-vet">★</span> <b>Veteran:</b> 6+ registered runs</div>
         </div>
@@ -183,10 +181,15 @@
             const stats = {};
             data.forEach(run => {
                 run.team.forEach(name => {
-                    if(!stats[name]) stats[name] = { wins: 0, runs: 0, max: 0 };
+                    if(!stats[name]) stats[name] = { wins: 0, runs: 0, max: 0, partners: new Set() };
                     stats[name].wins += run.wins;
                     stats[name].runs += 1;
                     if(run.wins > stats[name].max) stats[name].max = run.wins;
+                    
+                    // Specialist Logic: Track unique partners
+                    run.team.forEach(partner => {
+                        if(partner !== name) stats[name].partners.add(partner);
+                    });
                 });
             });
 
@@ -204,11 +207,9 @@
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 if(searchQuery && !name.toLowerCase().includes(searchQuery)) return false;
                 if(filterVal === 'diamond') return s.max >= 100;
-                if(filterVal === 'gold') return s.max >= 60 && s.max < 100;
-                if(filterVal === 'silver') return s.max >= 40 && s.max < 60;
-                if(filterVal === 'bronze') return s.max >= 30 && s.max < 40;
-                if(filterVal === 'spec') return s.max >= 15 && s.max < 30;
-                if(filterVal === 'leg') return s.max < 15;
+                if(filterVal === 'gold') return s.max >= 60;
+                if(filterVal === 'spec') return s.partners.size >= 12;
+                if(filterVal === 'leg') return s.wins >= 500;
                 if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
                 if(filterVal === 'vet') return s.runs >= 6;
                 return true;
@@ -231,13 +232,17 @@
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 let bc = ""; let bTags = "";
 
+                // Peak Badges
                 if(s.max >= 100) { bc = "border-diamond"; bTags += '<span class="badge badge-100">D</span>'; }
                 else if(s.max >= 60) { bc = "border-gold"; bTags += '<span class="badge badge-60">G</span>'; }
                 else if(s.max >= 40) { bTags += '<span class="badge badge-40">S</span>'; }
                 else if(s.max >= 30) { bTags += '<span class="badge badge-30">B</span>'; }
-                else if(s.max >= 15) { bTags += '<span class="badge badge-spec">S</span>'; }
-                else { bTags += '<span class="badge badge-leg">L</span>'; }
                 
+                // New logic Badges
+                if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
+                if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
+                
+                // Performance Badges
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
                 if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
 
@@ -246,7 +251,7 @@
                     <div style="font-weight:800; font-size:0.8rem;">${name}</div>
                     <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">
                         W: <b>${s.wins}</b> | P: <b>${s.max}</b><br>
-                        R: <b>${s.runs}</b>
+                        R: <b>${s.runs}</b> | T: <b>${s.partners.size}</b>
                     </div>
                     <div style="margin-top:5px;">${bTags}</div>
                 </div>`;
