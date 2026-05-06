@@ -33,22 +33,14 @@
             padding: 20px; 
             border-radius: var(--radius); 
             margin-bottom: 15px; 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
         }
 
         h2 { 
-            margin-top: 0; 
-            color: var(--text-main); 
-            font-size: 1.25rem; 
-            font-weight: 700;
-            border-bottom: 2px solid #f1f5f9; 
-            padding-bottom: 12px; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            flex-wrap: wrap; 
-            gap: 10px;
+            margin-top: 0; color: var(--text-main); font-size: 1.2rem; font-weight: 700;
+            border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; 
+            display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
         }
 
         #scrollTopBtn {
@@ -58,92 +50,33 @@
             box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5); font-size: 20px;
         }
 
-        /* Navigation Tabs */
-        .tabs { 
-            display: flex; 
-            gap: 8px; 
-            margin-bottom: 20px; 
-            background: #e2e8f0; 
-            padding: 6px; 
-            border-radius: 14px; 
-        }
+        /* TABS LOGIC */
+        .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 14px; }
         .tab-btn { 
-            flex: 1; 
-            padding: 12px; 
-            border: none; 
-            border-radius: 10px; 
-            background: none; 
-            cursor: pointer; 
-            font-weight: 600; 
-            color: var(--secondary); 
-            font-size: 0.85rem;
-            transition: all 0.2s ease;
+            flex: 1; padding: 12px; border: none; border-radius: 10px; background: none; 
+            cursor: pointer; font-weight: 600; color: var(--secondary); font-size: 0.85rem;
         }
-        .tab-btn.active { 
-            background: white; 
-            color: var(--primary); 
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Inputs & Forms */
-        input, select { 
-            width: 100%; 
-            padding: 12px; 
-            margin: 8px 0; 
-            border: 1px solid #cbd5e1; 
-            border-radius: 8px; 
-            box-sizing: border-box; 
-            font-size: 0.95rem; 
-            transition: border-color 0.2s;
-        }
-        input:focus { outline: none; border-color: var(--primary); ring: 2px solid var(--primary); }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        button { 
-            background: var(--primary); 
-            color: white; 
-            border: none; 
-            padding: 12px 18px; 
-            border-radius: 10px; 
-            cursor: pointer; 
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-        button:active { opacity: 0.8; }
-        .save-btn { background: var(--accent); width: 100%; font-size: 1rem; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
-        /* Sorting & Filtering */
-        .sort-btn { 
-            background: #f1f5f9; 
-            color: var(--secondary); 
-            font-size: 0.6rem; 
-            padding: 6px 8px; 
-            border-radius: 6px; 
-            text-transform: uppercase; 
-            display: flex; 
-            align-items: center; 
-            gap: 4px; 
-            border: 1px solid #e2e8f0; 
-        }
-        .sort-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .filter-select { width: auto; font-size: 0.7rem; padding: 4px 8px; height: 30px; margin: 0; background: #fff; border: 1.5px solid var(--primary); color: var(--primary); font-weight: 700; border-radius: 8px; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block !important; }
 
-        /* Stats Grid */
+        /* FORMS */
+        input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
+        button { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; }
+        .save-btn { background: var(--accent); width: 100%; font-size: 1rem; margin-top: 10px; }
+        
+        .sort-btn { background: #f1f5f9; color: var(--secondary); font-size: 0.6rem; padding: 6px 8px; border-radius: 6px; text-transform: uppercase; border: 1px solid #e2e8f0; }
+        .sort-btn.active { background: var(--primary); color: white; }
+        .filter-select { width: auto; font-size: 0.7rem; padding: 4px 8px; height: 30px; margin: 0; background: #fff; border: 1.5px solid var(--primary); color: var(--primary); font-weight: 700; }
+
+        /* GRID */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .stat-box { 
-            background: #ffffff; 
-            padding: 12px; 
-            border-radius: 12px; 
-            border: 1px solid #f1f5f9; 
-            position: relative; 
-            min-height: 95px; 
-            overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
+        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; position: relative; min-height: 95px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .poke-sprite { position: absolute; bottom: -4px; right: -4px; width: 55px; height: 55px; image-rendering: pixelated; z-index: 1; }
         
-        .poke-sprite { position: absolute; bottom: -4px; right: -4px; width: 55px; height: 55px; filter: drop-shadow(1px 1px 0px white); image-rendering: pixelated; z-index: 1; }
-        
-        /* Badges */
-        .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 800; text-transform: uppercase; margin-left: 2px; display: inline-block; vertical-align: middle; }
+        /* BADGES */
+        .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 800; margin-left: 2px; display: inline-block; }
         .badge-30 { background: #d97706; color: white; }
         .badge-40 { background: #94a3b8; color: white; }
         .badge-50 { background: #fbbf24; color: #78350f; }
@@ -151,88 +84,59 @@
         .badge-veteran { background: #818cf8; color: white; }
         .badge-ace { background: #10b981; color: white; }
         
-        .badge-key { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 10px; justify-content: center; border: 1px dashed #cbd5e1; }
+        .badge-key { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; justify-content: center; border: 1px dashed #cbd5e1; }
         .key-item { font-size: 0.6rem; color: var(--text-muted); font-weight: 600; }
         
-        /* History Items */
+        /* HISTORY */
         .history-item { border-bottom: 1px solid #f1f5f9; padding: 15px 0; }
-        .history-item:last-child { border: none; }
-        .history-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .streak-count { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
-        .team-display { font-size: 0.9rem; color: var(--text-main); font-weight: 500; }
-        .btn-small { background: #f1f5f9; color: var(--secondary); padding: 6px 10px; font-size: 0.7rem; border-radius: 6px; }
+        .team-display { font-size: 0.9rem; color: var(--text-main); font-weight: 500; margin-top: 5px; }
+        .btn-small { background: #f1f5f9; color: var(--secondary); padding: 5px 10px; font-size: 0.7rem; border-radius: 6px; }
         
-        .rating-chip { 
-            position: absolute; 
-            top: 8px; 
-            right: 8px; 
-            font-size: 0.6rem; 
-            background: #eff6ff; 
-            color: var(--primary); 
-            padding: 3px 6px; 
-            border-radius: 6px; 
-            font-weight: 800; 
-            z-index: 2;
-            border: 1px solid #dbeafe;
-        }
-        .rank-number { 
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: #f1f5f9;
-            color: var(--secondary);
-            font-size: 0.65rem;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-right: 6px;
-            font-weight: 700;
-        }
+        .rating-chip { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; background: #eff6ff; color: var(--primary); padding: 3px 6px; border-radius: 6px; font-weight: 800; border: 1px solid #dbeafe; z-index: 2;}
+        .rank-number { display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--secondary); font-size: 0.65rem; width: 20px; height: 20px; border-radius: 50%; margin-right: 6px; font-weight: 700; }
         
-        .hidden { display: none; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <button onclick="scrollToTop()" id="scrollTopBtn" title="Go to top">↑</button>
+    <button onclick="scrollToTop()" id="scrollTopBtn">↑</button>
 
-    <!-- NEW RUN SECTION -->
     <div id="top-anchor" class="card">
-        <h2 style="border:none; padding:0; margin-bottom:15px;">New Streak</h2>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+        <h2 style="border:none; padding:0; margin-bottom:10px;">New Streak</h2>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
             <input type="text" id="p1" list="poke-list" placeholder="Slot 1">
             <input type="text" id="p2" list="poke-list" placeholder="Slot 2">
             <input type="text" id="p3" list="poke-list" placeholder="Slot 3">
             <input type="text" id="p4" list="poke-list" placeholder="Slot 4 (Opt)">
         </div>
-        <input type="number" id="wins" placeholder="Streak Number">
+        <input type="number" id="wins" placeholder="Wins">
         <button class="save-btn" onclick="saveRun()">Register Run</button>
         <datalist id="poke-list"></datalist>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('leaderboard', this)">Leaderboard</button>
-        <button class="tab-btn" onclick="switchTab('history', this)">History</button>
-        <button class="tab-btn" onclick="switchTab('settings', this)">Tools</button>
+        <button class="tab-btn active" id="btn-leaderboard" onclick="switchTab('leaderboard', this)">Leaderboard</button>
+        <button class="tab-btn" id="btn-history" onclick="switchTab('history', this)">History</button>
+        <button class="tab-btn" id="btn-settings" onclick="switchTab('settings', this)">Tools</button>
     </div>
 
-    <!-- LEADERBOARD TAB -->
+    <!-- LEADERBOARD -->
     <div id="leaderboard" class="tab-content active">
         <div class="card">
             <h2>Rankings
-                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 6px; align-items: center; margin-top:5px;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; align-items: center;">
                     <select id="badgeFilter" class="filter-select" onchange="updateDisplay()">
-                        <option value="all">All Pokémon</option>
-                        <option value="ace">Aces Only</option>
-                        <option value="veteran">Veterans Only</option>
-                        <option value="100">Diamond Tier</option>
-                        <option value="50">Gold Tier</option>
-                        <option value="40">Silver Tier</option>
-                        <option value="30">Bronze Tier</option>
+                        <option value="all">All</option>
+                        <option value="ace">Aces</option>
+                        <option value="veteran">Vets</option>
+                        <option value="100">Diamond</option>
+                        <option value="50">Gold</option>
+                        <option value="40">Silver</option>
+                        <option value="30">Bronze</option>
                     </select>
-                    <button class="sort-btn" id="sortName" onclick="setSort('name')">Name</button>
                     <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
-                    <button class="sort-btn" id="sortRuns" onclick="setSort('runs')">Runs</button>
                     <button class="sort-btn" id="sortPeak" onclick="setSort('peak')">Peak</button>
                     <button class="sort-btn" id="sortRatio" onclick="setSort('ratio')">Rating</button>
                 </div>
@@ -240,14 +144,12 @@
             <div class="badge-key">
                 <div class="key-item"><span class="badge badge-veteran">★</span> Vet (6+)</div>
                 <div class="key-item"><span class="badge badge-ace">A</span> Ace (45+)</div>
-                <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
-                <div class="key-item"><span class="badge badge-50">G</span> 50+</div>
             </div>
             <div id="statsList" class="stats-grid"></div>
         </div>
     </div>
 
-    <!-- HISTORY TAB -->
+    <!-- HISTORY -->
     <div id="history" class="tab-content">
         <div class="card">
             <h2>Activity Log
@@ -260,20 +162,19 @@
         </div>
     </div>
 
-    <!-- SETTINGS TAB -->
+    <!-- TOOLS -->
     <div id="settings" class="tab-content">
         <div class="card">
-            <h2>Data Management</h2>
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                <button onclick="exportData()" style="background:var(--secondary)">Export Backup Code</button>
-                <button onclick="importData()" style="background:#475569">Import Backup Code</button>
-                <button style="background:var(--danger)" onclick="clearData()">Wipe Local Storage</button>
+            <h2>Management</h2>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button onclick="exportData()" style="background:var(--secondary)">Export Backup</button>
+                <button onclick="importData()" style="background:#475569">Import Backup</button>
+                <button style="background:var(--danger)" onclick="clearData()">Wipe All Data</button>
             </div>
         </div>
     </div>
 
     <script>
-        /* [LOGIC REMAINS IDENTICAL TO v19.0 FOR STABILITY] */
         let currentSort = 'wins';
         let sortDirection = -1;
         let currentHistorySort = 'date';
@@ -293,23 +194,16 @@
             }
         };
 
-        function scrollToTop() {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+        function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
 
-        function generateUniqueId() {
-            return Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
-        }
+        function generateUniqueId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
 
         function migrateOldIds() {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
             let seenIds = new Set();
             let changed = false;
             history.forEach(run => {
-                if (!run.id || seenIds.has(run.id)) {
-                    run.id = generateUniqueId();
-                    changed = true;
-                }
+                if (!run.id || seenIds.has(run.id)) { run.id = generateUniqueId(); changed = true; }
                 seenIds.add(run.id);
             });
             if (changed) localStorage.setItem('bt_records', JSON.stringify(history));
@@ -323,19 +217,11 @@
         }
 
         function setSort(type) {
-            if (currentSort === type) {
-                sortDirection *= -1;
-            } else {
-                currentSort = type;
-                sortDirection = (type === 'name') ? 1 : -1;
-            }
-            
+            if (currentSort === type) sortDirection *= -1;
+            else { currentSort = type; sortDirection = -1; }
             document.querySelectorAll('#leaderboard .sort-btn').forEach(btn => btn.classList.remove('active'));
-            const ids = {'name':'sortName','wins':'sortWins','runs':'sortRuns','peak':'sortPeak','ratio':'sortRatio'};
-            const activeBtn = document.getElementById(ids[type]);
-            activeBtn.classList.add('active');
-            activeBtn.innerHTML = type.charAt(0).toUpperCase() + type.slice(1) + (sortDirection === 1 ? ' ↑' : ' ↓');
-            
+            const ids = {'wins':'sortWins','peak':'sortPeak','ratio':'sortRatio'};
+            if(ids[type]) document.getElementById(ids[type]).classList.add('active');
             updateDisplay();
         }
 
@@ -350,7 +236,7 @@
         function saveRun() {
             const team = ['p1', 'p2', 'p3', 'p4'].map(id => document.getElementById(id).value.trim()).filter(v => v);
             const wins = parseInt(document.getElementById('wins').value);
-            if(!team.length || isNaN(wins)) return alert("Please enter team members and a win count.");
+            if(!team.length || isNaN(wins)) return alert("Enter team and wins.");
             const history = JSON.parse(localStorage.getItem('bt_records')) || [];
             history.push({ team, wins, id: generateUniqueId() });
             localStorage.setItem('bt_records', JSON.stringify(history));
@@ -359,26 +245,24 @@
         }
 
         function toggleEdit(id) { 
-            const targetId = String(id);
-            editingId = (String(editingId) === targetId) ? null : targetId; 
+            editingId = (editingId === id) ? null : id; 
             updateDisplay(); 
         }
 
         function updateEntry(id, index, newName) {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            const runIndex = history.findIndex(r => String(r.id) === String(id));
-            if (runIndex > -1) {
-                history[runIndex].team[index] = newName.trim();
+            const rIdx = history.findIndex(r => r.id === id);
+            if (rIdx > -1) {
+                history[rIdx].team[index] = newName.trim();
                 localStorage.setItem('bt_records', JSON.stringify(history));
             }
         }
 
         function deleteRun(id) {
-            if(!confirm("Are you sure you want to delete this run?")) return;
+            if(!confirm("Delete this run?")) return;
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            history = history.filter(r => String(r.id) !== String(id));
+            history = history.filter(r => r.id !== id);
             localStorage.setItem('bt_records', JSON.stringify(history));
-            if(String(editingId) === String(id)) editingId = null;
             updateDisplay();
         }
 
@@ -418,37 +302,32 @@
                 if (filterValue === 'all') return true;
                 if (filterValue === 'ace') return (r >= 45 && s.runs >= 3);
                 if (filterValue === 'veteran') return (s.runs >= 6);
-                if (filterValue === '100') return (s.max >= 100);
-                if (filterValue === '50') return (s.max >= 50 && s.max < 100);
-                if (filterValue === '40') return (s.max >= 40 && s.max < 50);
-                if (filterValue === '30') return (s.max >= 30 && s.max < 40);
+                if (['100','50','40','30'].includes(filterValue)) {
+                    const val = parseInt(filterValue);
+                    return s.max >= val && (filterValue === '100' ? true : s.max < (val === 50 ? 100 : val === 40 ? 50 : 40));
+                }
                 return true;
             }).sort((a,b) => {
                 let res = 0;
-                if(currentSort === 'name') res = a.toLowerCase().localeCompare(b.toLowerCase());
-                else if(currentSort === 'wins') res = stats[a].wins - stats[b].wins;
-                else if(currentSort === 'runs') res = stats[a].runs - stats[b].runs;
+                if(currentSort === 'wins') res = stats[a].wins - stats[b].wins;
                 else if(currentSort === 'peak') res = stats[a].max - stats[b].max;
                 else res = calculateRating(stats[a].wins, stats[a].runs) - calculateRating(stats[b].wins, stats[b].runs);
                 return res * sortDirection;
             });
 
             document.getElementById('statsList').innerHTML = sortedStats.map((name, index) => {
-                const ratingValue = calculateRating(stats[name].wins, stats[name].runs);
-                const species = extractSpecies(name);
-                
+                const rat = calculateRating(stats[name].wins, stats[name].runs);
                 return `
                 <div class="stat-box">
-                    <span class="rating-chip">R: ${ratingValue.toFixed(1)}</span>
-                    <div style="font-weight:700; font-size:0.8rem; border-bottom: 1px solid #f1f5f9; margin-bottom: 6px; padding-right: 40px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    <span class="rating-chip">R: ${rat.toFixed(1)}</span>
+                    <div style="font-weight:700; font-size:0.75rem; border-bottom: 1px solid #f1f5f9; margin-bottom: 6px; padding-right: 40px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <span class="rank-number">${index + 1}</span>${name}
                     </div>
-                    <div style="font-size:0.7rem; color:var(--text-main);">Wins: <strong>${stats[name].wins}</strong></div>
-                    <div style="font-size:0.7rem; color:var(--text-main);">Peak: <strong>${stats[name].max}</strong> ${getBadges(stats[name].max, stats[name].runs, ratingValue)}</div>
-                    <div style="font-size:0.65rem; color:var(--text-muted); margin-top:2px;">Runs: ${stats[name].runs}</div>
-                    <img class="poke-sprite" src="https://img.pokemondb.net/sprites/sun-moon/icon/${species}.png" onerror="this.style.display='none'">
-                </div>
-                `;
+                    <div style="font-size:0.7rem;">Wins: <strong>${stats[name].wins}</strong></div>
+                    <div style="font-size:0.7rem;">Peak: <strong>${stats[name].max}</strong> ${getBadges(stats[name].max, stats[name].runs, rat)}</div>
+                    <div style="font-size:0.65rem; color:var(--text-muted);">Runs: ${stats[name].runs}</div>
+                    <img class="poke-sprite" src="https://img.pokemondb.net/sprites/sun-moon/icon/${extractSpecies(name)}.png" onerror="this.style.display='none'">
+                </div>`;
             }).join('');
 
             const displayHistory = [...historyData];
@@ -456,7 +335,7 @@
             else displayHistory.sort((a, b) => b.wins - a.wins);
 
             document.getElementById('historyList').innerHTML = displayHistory.map(run => {
-                const isEditing = (String(editingId) === String(run.id));
+                const isEditing = (editingId === run.id);
                 return `
                 <div class="history-item">
                     <div class="history-header">
@@ -466,8 +345,8 @@
                             <button class="btn-small" style="color:var(--danger)" onclick="deleteRun('${run.id}')">Del</button>
                         </div>
                     </div>
-                    <div class="team-display ${isEditing?'hidden':''}">${run.team.join('  •  ')}</div>
-                    <div class="edit-row ${isEditing?'':'hidden'}" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
+                    <div class="team-display ${isEditing ? 'hidden' : ''}">${run.team.join('  •  ')}</div>
+                    <div class="edit-row ${isEditing ? '' : 'hidden'}" style="display:grid; grid-template-columns:1fr 1fr; gap:5px;">
                         ${run.team.map((n, i) => `<input type="text" value="${n}" onchange="updateEntry('${run.id}', ${i}, this.value)">`).join('')}
                     </div>
                 </div>`;
@@ -475,26 +354,26 @@
         }
 
         function getBadges(max, runs, rating) {
-            let badges = '';
-            if(max >= 100) badges += '<span class="badge badge-100">D</span>';
-            else if(max >= 50) badges += '<span class="badge badge-50">G</span>';
-            else if(max >= 40) badges += '<span class="badge badge-40">S</span>';
-            else if(max >= 30) badges += '<span class="badge badge-30">B</span>';
-            if(runs >= 6) badges += '<span class="badge badge-veteran">★</span>';
-            if(rating >= 45 && runs >= 3) badges += '<span class="badge badge-ace">A</span>';
-            return badges;
+            let b = '';
+            if(max >= 100) b += '<span class="badge badge-100">D</span>';
+            else if(max >= 50) b += '<span class="badge badge-50">G</span>';
+            else if(max >= 40) b += '<span class="badge badge-40">S</span>';
+            else if(max >= 30) b += '<span class="badge badge-30">B</span>';
+            if(runs >= 6) b += '<span class="badge badge-veteran">★</span>';
+            if(rating >= 45 && runs >= 3) b += '<span class="badge badge-ace">A</span>';
+            return b;
         }
 
         function exportData() {
             const d = localStorage.getItem('bt_records');
-            if(!d) return alert("No data to export!");
-            navigator.clipboard.writeText(d).then(() => alert("Backup code copied to clipboard!"));
+            if(!d) return alert("No data!");
+            navigator.clipboard.writeText(d).then(() => alert("Copied!"));
         }
         function importData() {
-            const c = prompt("Paste your backup code here:");
-            if(c) { try { JSON.parse(c); localStorage.setItem('bt_records', c); migrateOldIds(); updateDisplay(); } catch(e) { alert("Invalid backup code."); } }
+            const c = prompt("Paste code:");
+            if(c) { try { JSON.parse(c); localStorage.setItem('bt_records', c); migrateOldIds(); updateDisplay(); } catch(e) { alert("Invalid!"); } }
         }
-        function clearData() { if(confirm("Are you absolutely sure? This will delete all your records forever.")) { localStorage.clear(); updateDisplay(); } }
+        function clearData() { if(confirm("Wipe all data?")) { localStorage.clear(); updateDisplay(); } }
     </script>
 </body>
 </html>
