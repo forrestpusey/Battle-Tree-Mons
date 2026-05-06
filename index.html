@@ -22,15 +22,12 @@
         
         h2 { font-size: 1rem; margin: 0 0 12px 0; display: flex; justify-content: space-between; align-items: center; }
 
-        /* Hall of Fame - Party Layout */
+        /* Hall of Fame */
         .hof-container { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
         .hof-slot { background: #1e293b; color: white; padding: 10px 5px; border-radius: 10px; text-align: center; border: 1px solid #fbbf24; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .hof-rank { font-size: 0.55rem; color: #fbbf24; font-weight: 900; display: block; text-transform: uppercase; }
-        .hof-name { font-size: 0.75rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; margin: 2px 0; }
+        .hof-rank { font-size: 0.55rem; color: #fbbf24; font-weight: 900; display: block; }
+        .hof-name { font-size: 0.75rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
         .hof-wins { font-size: 0.6rem; color: #94a3b8; }
-
-        /* Badge Key */
-        .key-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; justify-content: center; }
 
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
@@ -64,11 +61,12 @@
 
         .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
         .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
+        
+        .guide-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
     </style>
 </head>
 <body>
 
-    <!-- INPUT UI -->
     <div class="card">
         <h2 id="form-title">Record Run</h2>
         <div class="input-grid">
@@ -83,39 +81,35 @@
         </div>
     </div>
 
-    <!-- TABS -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
         <button class="tab-btn" onclick="switchTab('hist', this)">History</button>
-        <button class="tab-btn" onclick="switchTab('util', this)">Settings</button>
+        <button class="tab-btn" onclick="switchTab('util', this)">Settings/Guides</button>
     </div>
 
     <!-- RANKINGS -->
     <div id="rank" class="tab-content active">
-        <h3 style="font-size: 0.75rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Current Party (Top 6)</h3>
+        <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
 
         <div class="card" style="padding:10px;">
-            <div class="key-grid">
-                <span class="badge badge-30">B</span><span style="font-size:0.6rem; margin-right:5px;">30+</span>
-                <span class="badge badge-40">S</span><span style="font-size:0.6rem; margin-right:5px;">40+</span>
-                <span class="badge badge-60">G</span><span style="font-size:0.6rem; margin-right:5px;">60+</span>
-                <span class="badge badge-100">D</span><span style="font-size:0.6rem; margin-right:5px;">100+</span>
-                <span class="badge badge-ace">A</span><span style="font-size:0.6rem; margin-right:5px;">Ace</span>
-                <span class="badge badge-vet">★</span><span style="font-size:0.6rem;">Vet</span>
-            </div>
-            <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search Pokémon..." oninput="updateDisplay()">
-            <div class="input-grid">
+            <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search name..." oninput="updateDisplay()">
+            <div class="input-grid" style="margin-bottom:8px;">
                 <select id="sortSelect" onchange="updateDisplay()">
                     <option value="wins">Total Wins</option>
+                    <option value="runs">Total Runs</option>
                     <option value="ratio">Rating Ratio</option>
-                    <option value="name">Name (A-Z)</option>
                     <option value="peak">Peak Streak</option>
+                    <option value="name">Name (A-Z)</option>
                 </select>
                 <select id="filterSelect" onchange="updateDisplay()">
                     <option value="all">All Pokémon</option>
-                    <option value="diamond">Diamond Only</option>
-                    <option value="ace">Aces Only</option>
+                    <option value="diamond">Diamond (100+)</option>
+                    <option value="gold">Gold (60+)</option>
+                    <option value="silver">Silver (40+)</option>
+                    <option value="bronze">Bronze (30+)</option>
+                    <option value="ace">Aces (45+ R)</option>
+                    <option value="vet">Veterans (6+ Runs)</option>
                 </select>
             </div>
         </div>
@@ -127,14 +121,25 @@
         <div id="historyList"></div>
     </div>
 
-    <!-- SETTINGS -->
+    <!-- SETTINGS & GUIDES -->
     <div id="util" class="tab-content">
+        <div class="card">
+            <h2>Badge Definitions</h2>
+            <div class="guide-row"><span class="badge badge-100">D</span> <b>Diamond:</b> Max streak of 100+</div>
+            <div class="guide-row"><span class="badge badge-60">G</span> <b>Gold:</b> Max streak of 60 - 99</div>
+            <div class="guide-row"><span class="badge badge-40">S</span> <b>Silver:</b> Max streak of 40 - 59</div>
+            <div class="guide-row"><span class="badge badge-30">B</span> <b>Bronze:</b> Max streak of 30 - 39</div>
+            <div class="guide-row"><span class="badge badge-ace">A</span> <b>Ace:</b> Rating 45+ and 3+ runs</div>
+            <div class="guide-row"><span class="badge badge-vet">★</span> <b>Veteran:</b> 6+ registered runs</div>
+            <p style="font-size:0.75rem; color:#64748b; margin-top:10px;"><i>*Rating is calculated using Wins, Runs, and a logarithmic consistency bonus.</i></p>
+        </div>
+
         <div class="card">
             <h2>Data Management</h2>
             <textarea id="importBox" style="width:100%; height:80px; margin-bottom:10px;" placeholder="JSON Data..."></textarea>
             <button class="btn-main" onclick="importData()" style="background:var(--accent);">Import JSON</button>
             <button class="btn-main" style="background:#64748b;" onclick="exportData()">Copy Backup</button>
-            <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe Data</button>
+            <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe All Data</button>
         </div>
     </div>
 
@@ -163,13 +168,9 @@
                 data.push({ team, wins, date: new Date().toLocaleDateString() });
             }
             localStorage.setItem(DB_KEY, JSON.stringify(data));
-            clearInputs();
-            updateDisplay();
-        }
-
-        function clearInputs() {
             [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
             document.getElementById('wins').value = '';
+            updateDisplay();
         }
 
         function updateDisplay() {
@@ -188,13 +189,12 @@
                 });
             });
 
-            // Hall of Fame calculation
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
                 <div class="hof-slot">
-                    <span class="hof-rank">Slot ${i+1}</span>
+                    <span class="hof-rank">#${i+1}</span>
                     <span class="hof-name">${name}</span>
-                    <span class="hof-wins">${stats[name].wins} Wins</span>
+                    <span class="hof-wins">${stats[name].wins}W</span>
                 </div>
             `).join('');
 
@@ -203,13 +203,18 @@
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 if(searchQuery && !name.toLowerCase().includes(searchQuery)) return false;
                 if(filterVal === 'diamond') return s.max >= 100;
+                if(filterVal === 'gold') return s.max >= 60;
+                if(filterVal === 'silver') return s.max >= 40;
+                if(filterVal === 'bronze') return s.max >= 30;
                 if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
+                if(filterVal === 'vet') return s.runs >= 6;
                 return true;
             });
 
             filteredNames.sort((a,b) => {
                 if(sortVal === 'name') return a.localeCompare(b);
                 if(sortVal === 'peak') return stats[b].max - stats[a].max;
+                if(sortVal === 'runs') return stats[b].runs - stats[a].runs;
                 if(sortVal === 'ratio') {
                     const rB = (stats[b].wins/stats[b].runs)*(1+Math.log10(stats[b].runs));
                     const rA = (stats[a].wins/stats[a].runs)*(1+Math.log10(stats[a].runs));
@@ -221,20 +226,15 @@
             document.getElementById('statsList').innerHTML = filteredNames.map(name => {
                 const s = stats[name];
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
-                let bc = "";
-                let bTags = "";
+                let bc = ""; let bTags = "";
 
-                // Badge Logic
                 if(s.max >= 100) { bc = "border-diamond"; bTags += '<span class="badge badge-100">D</span>'; }
                 else if(s.max >= 60) { bc = "border-gold"; bTags += '<span class="badge badge-60">G</span>'; }
                 else if(s.max >= 40) { bTags += '<span class="badge badge-40">S</span>'; }
                 else if(s.max >= 30) { bTags += '<span class="badge badge-30">B</span>'; }
                 
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
-                if(rat >= 45 && s.runs >= 3) { 
-                    if(!bc) bc = "border-ace"; 
-                    bTags += '<span class="badge badge-ace">A</span>'; 
-                }
+                if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
 
                 return `<div class="stat-box ${bc}">
                     <span class="rating-tag">${rat.toFixed(1)}</span>
@@ -271,7 +271,8 @@
         function cancelEdit() {
             currentEditIndex = -1;
             document.getElementById('form-title').innerText = "Record Run";
-            clearInputs();
+            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
+            document.getElementById('wins').value = '';
             document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
         }
 
