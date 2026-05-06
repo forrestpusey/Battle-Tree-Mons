@@ -20,15 +20,18 @@
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px 15px 80px 15px; color: #1e293b; }
+
         .card { background: var(--card); padding: 15px; border-radius: var(--radius); margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        
         h2 { font-size: 1rem; margin: 0 0 12px 0; display: flex; justify-content: space-between; align-items: center; }
 
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+        input:focus { border-color: var(--primary); }
         
         button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; }
         .btn-main { width: 100%; background: var(--primary); color: white; padding: 12px; margin-top: 10px; }
-        .btn-edit { background: #f1f5f9; color: #475569; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #cbd5e1; }
+        .btn-edit { background: #f1f5f9; color: #475569; padding: 6px 10px; font-size: 0.75rem; margin-right: 4px; border: 1px solid #cbd5e1; }
         .btn-del { background: #fee2e2; color: #ef4444; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #fecaca; }
 
         .tabs { display: flex; gap: 5px; margin: 15px 0; background: #e2e8f0; padding: 4px; border-radius: 10px; }
@@ -38,7 +41,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* BADGES */
         .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; margin-right: 4px; display: inline-block; }
         .badge-30 { background: #d97706; }
         .badge-40 { background: #94a3b8; }
@@ -49,23 +51,26 @@
         .badge-spec { background: var(--specialist); }
         .badge-leg { background: var(--legacy); }
 
+        .interactive-key { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 10px; background: #fff; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
+
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 110px; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 85px; }
         
-        .border-diamond { border-color: var(--brd-diamond); box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
-        .border-gold { border-color: var(--brd-gold); box-shadow: 0 0 8px rgba(251, 191, 36, 0.2); }
+        .border-diamond { border-color: var(--brd-diamond); box-shadow: 0 0 8px rgba(168, 85, 247, 0.1); }
+        .border-gold { border-color: var(--brd-gold); box-shadow: 0 0 8px rgba(251, 191, 36, 0.1); }
         .border-ace { border-color: var(--brd-ace); }
 
-        /* SPRITE STYLE */
-        .poke-sprite { width: 60px; height: 60px; margin-bottom: -5px; margin-top: -5px; object-fit: contain; }
-        .rating-tag { position: absolute; top: 6px; right: 6px; font-size: 0.6rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 5px; border-radius: 8px; border: 1px solid #dbeafe; }
+        .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
 
-        .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
+        .guide-item { display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 0.85rem; padding: 8px; border-radius: 8px; }
+        .highlight { background: #dbeafe !important; }
+        
+        .search-container { margin-bottom: 10px; }
+        .search-input { border: 2px solid var(--primary); font-weight: 600; }
     </style>
 </head>
 <body>
 
-    <!-- INPUT UI -->
     <div class="card">
         <h2 id="form-title">Record Run</h2>
         <div class="input-grid">
@@ -83,45 +88,53 @@
     <div class="tabs">
         <button class="tab-btn active" id="btn-rank" onclick="switchTab('rank', this)">Rankings</button>
         <button class="tab-btn" id="btn-hist" onclick="switchTab('hist', this)">History</button>
-        <button class="tab-btn" id="btn-util" onclick="switchTab('util', this)">Settings</button>
+        <button class="tab-btn" id="btn-util" onclick="switchTab('util', this)">Guides/Settings</button>
     </div>
 
-    <!-- RANKINGS -->
     <div id="rank" class="tab-content active">
-        <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search..." oninput="updateDisplay()">
-        <div class="input-grid" style="margin-bottom:10px;">
-            <select id="sortSelect" onchange="updateDisplay()"><option value="wins">Wins</option><option value="name">Name</option><option value="ratio">Rating</option></select>
-            <select id="filterSelect" onchange="updateDisplay()"><option value="all">All</option><option value="badge-100">Diamond</option><option value="ace">Aces</option></select>
+        <div class="card" style="padding:10px; margin-bottom:10px;">
+            <div class="search-container">
+                <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search Pokémon name..." oninput="updateDisplay()">
+            </div>
+            <div class="input-grid" style="grid-template-columns: 1.2fr 1.3fr; margin-bottom: 10px;">
+                <select id="sortSelect" onchange="updateDisplay()">
+                    <option value="wins">Sort by Total Wins</option>
+                    <option value="name">Sort by Name</option>
+                    <option value="ratio">Sort by Rating Ratio</option>
+                </select>
+                <select id="filterSelect" onchange="updateDisplay()">
+                    <option value="all">All Pokémon</option>
+                    <option value="badge-100">Diamond (100+)</option>
+                    <option value="ace">Aces (45+ R)</option>
+                </select>
+            </div>
+            
+            <div class="interactive-key">
+                <span onclick="jumpToGuide('30')"><span class="badge badge-30">B</span>30+</span>
+                <span onclick="jumpToGuide('100')"><span class="badge badge-100">D</span>100+</span>
+                <span onclick="jumpToGuide('ace')"><span class="badge badge-ace">A</span>Ace</span>
+            </div>
         </div>
         <div class="stats-grid" id="statsList"></div>
     </div>
 
-    <!-- HISTORY -->
     <div id="hist" class="tab-content">
         <div id="historyList"></div>
     </div>
 
-    <!-- SETTINGS -->
     <div id="util" class="tab-content">
         <div class="card">
             <h2>Data Management</h2>
-            <textarea id="importBox" style="width:100%; height:60px;" placeholder="JSON..."></textarea>
-            <button class="btn-main" onclick="importData()" style="background:var(--accent);">Import</button>
+            <textarea id="importBox" style="width:100%; height:80px; margin-bottom:10px;" placeholder="Paste JSON here..."></textarea>
+            <button class="btn-main" onclick="importData()" style="background:var(--accent);">Import JSON</button>
             <button class="btn-main" style="background:#64748b;" onclick="exportData()">Copy Backup</button>
-            <button class="btn-main" style="background:var(--danger);" onclick="clearAll()">Wipe Data</button>
+            <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe All Data</button>
         </div>
     </div>
 
     <script>
         const DB_KEY = 'bt_records_final';
         let currentEditIndex = -1;
-
-        // SPRITE HELPER: Formats name for PokeAPI
-        function getSpriteUrl(name) {
-            const clean = name.toLowerCase().trim().replace(' ', '-').replace(/[^\w-]/g, '');
-            if(!clean) return '';
-            return `https://img.pokemondb.net/sprites/home/normal/${clean}.png`;
-        }
 
         window.onload = updateDisplay;
 
@@ -132,15 +145,24 @@
             btn.classList.add('active');
         }
 
+        function jumpToGuide(tag) {
+            switchTab('util', document.getElementById('btn-util'));
+        }
+
         function saveRun() {
             const team = [1,2,3,4].map(i => document.getElementById('p'+i).value.trim()).filter(v => v);
             const wins = parseInt(document.getElementById('wins').value);
             if(!team.length || isNaN(wins)) return;
             let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            if(currentEditIndex > -1) { data[currentEditIndex] = { ...data[currentEditIndex], team, wins }; cancelEdit(); }
-            else { data.push({ team, wins, date: new Date().toLocaleDateString() }); }
+            if(currentEditIndex > -1) {
+                data[currentEditIndex] = { ...data[currentEditIndex], team, wins };
+                cancelEdit();
+            } else {
+                data.push({ team, wins, date: new Date().toLocaleDateString() });
+            }
             localStorage.setItem(DB_KEY, JSON.stringify(data));
-            clearInputs(); updateDisplay();
+            clearInputs();
+            updateDisplay();
         }
 
         function startEdit(index) {
@@ -151,7 +173,9 @@
             clearInputs();
             run.team.forEach((name, i) => { if(i < 4) document.getElementById('p' + (i+1)).value = name; });
             document.getElementById('wins').value = run.wins;
-            document.getElementById('btn-container').innerHTML = `<button class="btn-main" style="background:#f59e0b" onclick="saveRun()">Update</button><button class="btn-main" style="background:#64748b" onclick="cancelEdit()">Cancel</button>`;
+            document.getElementById('btn-container').innerHTML = `
+                <button class="btn-main" style="background:#f59e0b" onclick="saveRun()">Update Run</button>
+                <button class="btn-main" style="background:#64748b; margin-top:5px;" onclick="cancelEdit()">Cancel Edit</button>`;
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
@@ -163,15 +187,17 @@
         }
 
         function deleteRun(index) {
-            if(confirm("Delete?")) {
-                let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-                data.splice(index, 1);
-                localStorage.setItem(DB_KEY, JSON.stringify(data));
-                updateDisplay();
-            }
+            if(!confirm("Are you sure?")) return;
+            let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+            data.splice(index, 1);
+            localStorage.setItem(DB_KEY, JSON.stringify(data));
+            updateDisplay();
         }
 
-        function clearInputs() { [1,2,3,4].forEach(i => document.getElementById('p'+i).value = ''); document.getElementById('wins').value = ''; }
+        function clearInputs() {
+            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
+            document.getElementById('wins').value = '';
+        }
 
         function updateDisplay() {
             const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
@@ -217,11 +243,19 @@
                 else if(s.max >= 50) bc = "border-gold";
                 else if(rat >= 45 && s.runs >= 3) bc = "border-ace";
 
+                let b = "";
+                if(s.max >= 100) b += '<span class="badge badge-100">D</span>';
+                else if(s.max >= 50) b += '<span class="badge badge-50">G</span>';
+                if(rat >= 45 && s.runs >= 3) b += '<span class="badge badge-ace">A</span>';
+
                 return `<div class="stat-box ${bc}">
                     <span class="rating-tag">${rat.toFixed(1)}</span>
-                    <img class="poke-sprite" src="${getSpriteUrl(name)}" onerror="this.style.display='none'">
-                    <div style="font-weight:800; font-size:0.75rem; margin-top:2px;">${name}</div>
-                    <div style="font-size:0.6rem; color:#64748b;">W: ${s.wins} | P: ${s.max}</div>
+                    <div style="font-weight:800; font-size:0.8rem;">${name}</div>
+                    <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">
+                        Wins: <b>${s.wins}</b> | Peak: <b>${s.max}</b><br>
+                        Runs: <b>${s.runs}</b>
+                    </div>
+                    <div style="margin-top:5px;">${b}</div>
                 </div>`;
             }).join('');
 
@@ -229,26 +263,36 @@
                 <div class="card" style="padding:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
-                        <div><button class="btn-edit" onclick="startEdit(${run.originalIndex})">Edit</button>
-                        <button class="btn-del" onclick="deleteRun(${run.originalIndex})">X</button></div>
+                        <div>
+                            <button class="btn-edit" onclick="startEdit(${run.originalIndex})">Edit</button>
+                            <button class="btn-del" onclick="deleteRun(${run.originalIndex})">Delete</button>
+                        </div>
                     </div>
-                    <div style="display:flex; gap:10px; margin-top:5px;">
-                        ${run.team.map(n => `<img src="${getSpriteUrl(n)}" style="width:35px; height:35px;" onerror="this.remove()">`).join('')}
-                    </div>
+                    <div style="font-size:0.8rem; margin-top:6px; color:#475569;">${run.team.join(' • ')}</div>
                 </div>`).join('');
-            document.getElementById('historyList').innerHTML = historyHTML || '<p>No records.</p>';
+            document.getElementById('historyList').innerHTML = historyHTML || '<p>No records found.</p>';
         }
 
-        function importData() { 
-            try { 
-                const raw = document.getElementById('importBox').value; 
-                JSON.parse(raw); 
-                localStorage.setItem(DB_KEY, raw); 
-                updateDisplay(); 
-            } catch(e) { alert("Fail"); } 
+        function importData() {
+            try {
+                const raw = document.getElementById('importBox').value;
+                JSON.parse(raw);
+                localStorage.setItem(DB_KEY, raw);
+                updateDisplay();
+            } catch(e) { alert("Invalid Format"); }
         }
-        function exportData() { navigator.clipboard.writeText(localStorage.getItem(DB_KEY) || '[]'); alert("Copied!"); }
-        function clearAll() { if(confirm("Wipe?")) { localStorage.removeItem(DB_KEY); updateDisplay(); } }
+
+        function exportData() {
+            navigator.clipboard.writeText(localStorage.getItem(DB_KEY) || '[]');
+            alert("Backup copied!");
+        }
+
+        function clearAll() {
+            if(confirm("Wipe all data?")) {
+                localStorage.removeItem(DB_KEY);
+                updateDisplay();
+            }
+        }
     </script>
 </body>
 </html>
