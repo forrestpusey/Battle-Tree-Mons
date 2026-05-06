@@ -27,8 +27,8 @@
         
         button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; }
         .btn-main { width: 100%; background: var(--primary); color: white; padding: 12px; margin-top: 10px; }
-        .btn-edit { background: #f1f5f9; color: #475569; padding: 4px 8px; font-size: 0.7rem; margin-right: 4px; }
-        .btn-del { background: #fee2e2; color: #ef4444; padding: 4px 8px; font-size: 0.7rem; }
+        .btn-edit { background: #f1f5f9; color: #475569; padding: 6px 10px; font-size: 0.75rem; margin-right: 4px; border: 1px solid #cbd5e1; }
+        .btn-del { background: #fee2e2; color: #ef4444; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #fecaca; }
 
         .tabs { display: flex; gap: 5px; margin: 15px 0; background: #e2e8f0; padding: 4px; border-radius: 10px; }
         .tab-btn { flex: 1; padding: 8px; background: none; font-size: 0.8rem; color: #64748b; }
@@ -38,7 +38,7 @@
         .tab-content.active { display: block; }
 
         /* BADGES */
-        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; margin-right: 4px; display: inline-block; transition: transform 0.1s; }
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; margin-right: 4px; display: inline-block; }
         .badge-30 { background: #d97706; }
         .badge-40 { background: #94a3b8; }
         .badge-50 { background: #fbbf24; color: #78350f; }
@@ -48,7 +48,6 @@
         .badge-spec { background: var(--specialist); }
         .badge-leg { background: var(--legacy); }
 
-        /* INTERACTIVE KEY */
         .interactive-key { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 10px; background: #fff; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
@@ -62,7 +61,7 @@
 <body>
 
     <!-- INPUT UI -->
-    <div class="card" id="editor-ui">
+    <div class="card">
         <h2 id="form-title">Record Run</h2>
         <div class="input-grid">
             <input type="text" id="p1" placeholder="Pokémon 1">
@@ -121,7 +120,6 @@
                 <span onclick="jumpToGuide('leg')"><span class="badge badge-leg">L</span>Leg</span>
             </div>
         </div>
-
         <div class="stats-grid" id="statsList"></div>
     </div>
 
@@ -156,7 +154,7 @@
 
     <script>
         const DB_KEY = 'bt_records_final';
-        let editId = null;
+        let currentEditIndex = -1;
 
         window.onload = updateDisplay;
 
@@ -183,52 +181,62 @@
             if(!team.length || isNaN(wins)) return;
 
             let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            if(editId) {
-                data = data.map(r => r.id === editId ? { ...r, team, wins } : r);
-                editId = null;
-                document.getElementById('form-title').innerText = "Record Run";
-                document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
+
+            if(currentEditIndex > -1) {
+                // UPDATE EXISTING
+                data[currentEditIndex] = { ...data[currentEditIndex], team, wins };
+                cancelEdit();
             } else {
-                data.push({ id: Date.now(), team, wins, date: new Date().toLocaleDateString() });
+                // NEW RUN
+                data.push({ team, wins, date: new Date().toLocaleDateString() });
             }
+
             localStorage.setItem(DB_KEY, JSON.stringify(data));
-            [1,2,3,4, 'wins'].forEach(i => {
-                let el = document.getElementById(i);
-                if(el) el.value = '';
-            });
+            clearInputs();
             updateDisplay();
         }
 
-        function startEdit(id) {
-            const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            const run = data.find(r => r.id === id);
+        function startEdit(index) {
+            let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+            const run = data[index];
             if(!run) return;
-            editId = id;
-            document.getElementById('form-title').innerText = "Editing Run...";
-            [1,2,3,4].forEach((i, idx) => document.getElementById('p'+i).value = run.team[idx] || '');
+
+            currentEditIndex = index;
+            document.getElementById('form-title').innerText = "Editing Run #" + (index + 1);
+            
+            // Clear inputs first
+            clearInputs();
+            // Fill inputs
+            run.team.forEach((name, i) => {
+                if(i < 4) document.getElementById('p' + (i+1)).value = name;
+            });
             document.getElementById('wins').value = run.wins;
+
             document.getElementById('btn-container').innerHTML = `
                 <button class="btn-main" style="background:#f59e0b" onclick="saveRun()">Update Run</button>
-                <button class="btn-main" style="background:#64748b; margin-top:5px;" onclick="cancelEdit()">Cancel</button>`;
+                <button class="btn-main" style="background:#64748b; margin-top:5px;" onclick="cancelEdit()">Cancel Edit</button>`;
+            
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function cancelEdit() {
-            editId = null;
+            currentEditIndex = -1;
             document.getElementById('form-title').innerText = "Record Run";
-            [1,2,3,4, 'wins'].forEach(i => {
-                let el = document.getElementById(i.toString().startsWith('p') ? i : 'wins');
-                if(el) el.value = '';
-            });
+            clearInputs();
             document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
         }
 
-        function deleteRun(id) {
-            if(!confirm("Delete this entry?")) return;
+        function deleteRun(index) {
+            if(!confirm("Are you sure you want to delete this run?")) return;
             let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            data = data.filter(r => r.id !== id);
+            data.splice(index, 1);
             localStorage.setItem(DB_KEY, JSON.stringify(data));
             updateDisplay();
+        }
+
+        function clearInputs() {
+            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
+            document.getElementById('wins').value = '';
         }
 
         function updateDisplay() {
@@ -236,6 +244,7 @@
             const sortVal = document.getElementById('sortSelect').value;
             const filterVal = document.getElementById('filterSelect').value;
 
+            // RANKINGS CALCULATION
             const stats = {};
             data.forEach(run => {
                 run.team.forEach(name => {
@@ -247,10 +256,9 @@
                 });
             });
 
-            let sorted = Object.keys(stats).filter(name => {
+            let sortedNames = Object.keys(stats).filter(name => {
                 const s = stats[name];
                 const r = (s.wins / s.runs) * (1 + Math.log10(s.runs));
-                
                 if(filterVal === 'ace') return (r >= 45 && s.runs >= 3);
                 if(filterVal === 'spec') return s.partners.size >= 9;
                 if(filterVal === 'leg') return s.wins >= 500;
@@ -262,7 +270,7 @@
                 return true;
             });
 
-            sorted.sort((a,b) => {
+            sortedNames.sort((a,b) => {
                 if(sortVal === 'name') return a.localeCompare(b);
                 if(sortVal === 'runs') return stats[b].runs - stats[a].runs;
                 if(sortVal === 'ratio') {
@@ -273,7 +281,7 @@
                 return stats[b].wins - stats[a].wins;
             });
 
-            document.getElementById('statsList').innerHTML = sorted.map(name => {
+            document.getElementById('statsList').innerHTML = sortedNames.map(name => {
                 const s = stats[name];
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 let b = "";
@@ -297,17 +305,24 @@
                 </div>`;
             }).join('');
 
-            document.getElementById('historyList').innerHTML = [...data].reverse().map(run => `
+            // HISTORY RENDER
+            // We reverse for display, but keep the original index for editing
+            const historyHTML = data.map((run, index) => ({...run, originalIndex: index}))
+                .reverse()
+                .map(run => `
                 <div class="card" style="padding:10px;">
-                    <div style="display:flex; justify-content:space-between;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
                         <div>
-                            <button class="btn-edit" onclick="startEdit(${run.id})">Edit</button>
-                            <button class="btn-del" onclick="deleteRun(${run.id})">Del</button>
+                            <button class="btn-edit" onclick="startEdit(${run.originalIndex})">Edit</button>
+                            <button class="btn-del" onclick="deleteRun(${run.originalIndex})">Delete</button>
                         </div>
                     </div>
-                    <div style="font-size:0.8rem; margin-top:4px;">${run.team.join(' • ')}</div>
+                    <div style="font-size:0.8rem; margin-top:6px; color:#475569;">${run.team.join(' • ')}</div>
+                    <div style="font-size:0.6rem; color:#94a3b8; margin-top:4px;">Recorded: ${run.date || 'N/A'}</div>
                 </div>`).join('');
+            
+            document.getElementById('historyList').innerHTML = historyHTML || '<p style="text-align:center; color:#64748b;">No runs recorded yet.</p>';
         }
 
         function importData() {
@@ -317,17 +332,23 @@
                 if(Array.isArray(parsed)) {
                     localStorage.setItem(DB_KEY, raw);
                     updateDisplay();
-                    alert("Data Imported!");
+                    alert("Imported " + parsed.length + " runs!");
                 }
-            } catch(e) { alert("Invalid Format"); }
+            } catch(e) { alert("Invalid data format. Please paste a valid JSON array."); }
         }
 
         function exportData() {
-            navigator.clipboard.writeText(localStorage.getItem(DB_KEY) || '[]');
-            alert("Backup Copied!");
+            const data = localStorage.getItem(DB_KEY) || '[]';
+            navigator.clipboard.writeText(data);
+            alert("Backup string copied to clipboard!");
         }
 
-        function clearAll() { if(confirm("WIPE EVERYTHING?")) { localStorage.clear(); updateDisplay(); } }
+        function clearAll() {
+            if(confirm("DANGER: This will permanently delete ALL recorded data. Proceed?")) {
+                localStorage.removeItem(DB_KEY);
+                updateDisplay();
+            }
+        }
     </script>
 </body>
 </html>
