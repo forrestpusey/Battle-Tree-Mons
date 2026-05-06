@@ -6,26 +6,32 @@
     <title>Battle Tree Ultimate</title>
     <style>
         :root {
-            --bg: #f1f5f9;
+            --bg: #f8fafc;
             --card: #ffffff;
             --primary: #3b82f6;
             --accent: #10b981;
             --danger: #ef4444;
             --specialist: #2dd4bf;
             --legacy: #1e293b;
-            --radius: 12px;
+            --radius: 14px;
+            /* Border Colors */
+            --brd-diamond: #a855f7;
+            --brd-gold: #fbbf24;
+            --brd-ace: #10b981;
         }
 
         body { font-family: 'Inter', sans-serif; background: var(--bg); margin: 0; padding: 15px 15px 80px 15px; color: #1e293b; }
 
-        .card { background: var(--card); padding: 15px; border-radius: var(--radius); margin-bottom: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; }
+        .card { background: var(--card); padding: 15px; border-radius: var(--radius); margin-bottom: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         
         h2 { font-size: 1rem; margin: 0 0 12px 0; display: flex; justify-content: space-between; align-items: center; }
 
         .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.9rem; outline: none; transition: border 0.2s; }
+        input:focus { border-color: var(--primary); }
         
-        button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; }
+        button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; transition: opacity 0.2s; }
+        button:active { opacity: 0.7; }
         .btn-main { width: 100%; background: var(--primary); color: white; padding: 12px; margin-top: 10px; }
         .btn-edit { background: #f1f5f9; color: #475569; padding: 6px 10px; font-size: 0.75rem; margin-right: 4px; border: 1px solid #cbd5e1; }
         .btn-del { background: #fee2e2; color: #ef4444; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #fecaca; }
@@ -50,11 +56,19 @@
 
         .interactive-key { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: center; padding: 10px; background: #fff; border-radius: 8px; margin-bottom: 12px; border: 1px solid #e2e8f0; font-size: 0.7rem; font-weight: 600; cursor: pointer; }
 
+        /* STAT BOX STYLES & BORDERS */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 1px solid #e2e8f0; position: relative; min-height: 85px; }
-        .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; }
+        .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 85px; transition: transform 0.2s; }
+        .stat-box:active { transform: scale(0.98); }
+        
+        /* THE BORDERS */
+        .border-diamond { border-color: var(--brd-diamond); box-shadow: 0 0 8px rgba(168, 85, 247, 0.2); }
+        .border-gold { border-color: var(--brd-gold); box-shadow: 0 0 8px rgba(251, 191, 36, 0.2); }
+        .border-ace { border-color: var(--brd-ace); }
 
-        .guide-item { display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 0.85rem; padding: 8px; border-radius: 8px; transition: background 0.5s; }
+        .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
+
+        .guide-item { display: flex; align-items: flex-start; margin-bottom: 12px; font-size: 0.85rem; padding: 8px; border-radius: 8px; }
         .highlight { background: #dbeafe !important; }
         
         .search-container { margin-bottom: 10px; }
@@ -185,16 +199,13 @@
             const team = [1,2,3,4].map(i => document.getElementById('p'+i).value.trim()).filter(v => v);
             const wins = parseInt(document.getElementById('wins').value);
             if(!team.length || isNaN(wins)) return;
-
             let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-
             if(currentEditIndex > -1) {
                 data[currentEditIndex] = { ...data[currentEditIndex], team, wins };
                 cancelEdit();
             } else {
                 data.push({ team, wins, date: new Date().toLocaleDateString() });
             }
-
             localStorage.setItem(DB_KEY, JSON.stringify(data));
             clearInputs();
             updateDisplay();
@@ -255,11 +266,7 @@
             let sortedNames = Object.keys(stats).filter(name => {
                 const s = stats[name];
                 const r = (s.wins / s.runs) * (1 + Math.log10(s.runs));
-                
-                // Match Search Query
                 if(searchQuery && !name.toLowerCase().includes(searchQuery)) return false;
-
-                // Match Badge Filters
                 if(filterVal === 'ace') return (r >= 45 && s.runs >= 3);
                 if(filterVal === 'spec') return s.partners.size >= 9;
                 if(filterVal === 'leg') return s.wins >= 500;
@@ -285,6 +292,13 @@
             document.getElementById('statsList').innerHTML = sortedNames.map(name => {
                 const s = stats[name];
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
+                
+                // Logic for Border Class
+                let borderClass = "";
+                if(s.max >= 100) borderClass = "border-diamond";
+                else if(s.max >= 50) borderClass = "border-gold";
+                else if(rat >= 45 && s.runs >= 3) borderClass = "border-ace";
+
                 let b = "";
                 if(s.max >= 100) b += '<span class="badge badge-100">D</span>';
                 else if(s.max >= 50) b += '<span class="badge badge-50">G</span>';
@@ -295,7 +309,7 @@
                 if(s.partners.size >= 9) b += '<span class="badge badge-spec">⬥</span>';
                 if(s.wins >= 500) b += '<span class="badge badge-leg">L</span>';
 
-                return `<div class="stat-box">
+                return `<div class="stat-box ${borderClass}">
                     <span class="rating-tag">${rat.toFixed(1)}</span>
                     <div style="font-weight:800; font-size:0.8rem;">${name}</div>
                     <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">
