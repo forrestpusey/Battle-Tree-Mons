@@ -23,32 +23,33 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border: 1px solid #e2e8f0;
         }
 
-        h2 { margin: 0 0 15px 0; font-size: 1.1rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
+        h2 { margin: 0 0 15px 0; font-size: 1.1rem; border-bottom: 2px solid #f1f5f9; padding-bottom: 10px; }
 
-        /* TABS */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 5px; border-radius: 12px; }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 8px; background: none; cursor: pointer; font-weight: 700; color: var(--secondary); font-size: 0.8rem; }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block !important; }
 
-        /* INPUTS */
         input { width: 100%; padding: 12px; margin: 5px 0; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; }
         .save-btn { width: 100%; background: var(--grad); color: white; border: none; padding: 12px; border-radius: 10px; font-weight: 800; cursor: pointer; margin-top: 10px; }
 
-        /* GRID */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-box { background: white; padding: 12px; border-radius: 14px; border: 1px solid #f1f5f9; position: relative; min-height: 90px; overflow: hidden; display: flex; flex-direction: column; justify-content: center; }
-        .poke-sprite { position: absolute; right: -5px; bottom: -5px; width: 56px; height: 56px; z-index: 1; opacity: 0.9; }
+        .poke-sprite { position: absolute; right: -5px; bottom: -5px; width: 56px; height: 56px; z-index: 1; opacity: 0.95; }
         
-        /* BADGES */
         .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: 900; margin-left: 2px; color: white; display: inline-block; vertical-align: middle; }
         .badge-100 { background: #a855f7; }
         .badge-50 { background: #fbbf24; color: #78350f; }
         .badge-ace { background: #10b981; }
         .badge-vet { background: #6366f1; }
+        .badge-spec { background: var(--specialist); }
+        .badge-leg { background: var(--legacy); }
         
-        .rating-chip { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; font-weight: 800; color: var(--primary); background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
+        .rating-chip { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; font-weight: 800; color: var(--primary); background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; z-index: 3; }
+        
+        .empty-state { text-align: center; color: var(--secondary); padding: 40px 20px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -65,9 +66,9 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
-        <button class="tab-btn" onclick="switchTab('hist', this)">History</button>
-        <button class="tab-btn" onclick="switchTab('man', this)">Guide</button>
+        <button class="tab-btn active" id="t-rank" onclick="switchTab('rank', this)">Rankings</button>
+        <button class="tab-btn" id="t-hist" onclick="switchTab('hist', this)">History</button>
+        <button class="tab-btn" id="t-man" onclick="switchTab('man', this)">Guide</button>
     </div>
 
     <div id="rank" class="tab-content active">
@@ -81,92 +82,114 @@
     <div id="man" class="tab-content">
         <div class="card">
             <h3>Badge Guide</h3>
-            <p><span class="badge badge-100">D</span> <b>Diamond:</b> Streak of 100+</p>
-            <p><span class="badge badge-50">G</span> <b>Gold:</b> Streak of 50+</p>
-            <p><span class="badge badge-ace">A</span> <b>Ace:</b> High Rating (45+)</p>
-            <p><span class="badge badge-vet">★</span> <b>Veteran:</b> 6+ Runs recorded</p>
+            <p><span class="badge badge-spec">⬥</span> <b>Specialist:</b> 9+ Unique partners.</p>
+            <p><span class="badge badge-leg">L</span> <b>Legacy:</b> 500+ Lifetime wins.</p>
+            <p><span class="badge badge-ace">A</span> <b>Ace:</b> High Rating (45+).</p>
+            <p><span class="badge badge-vet">★</span> <b>Veteran:</b> 6+ Runs recorded.</p>
+            <p><span class="badge badge-100">D</span> <b>Diamond:</b> Max streak 100+.</p>
+            <p><span class="badge badge-50">G</span> <b>Gold:</b> Max streak 50+.</p>
+            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+            <button onclick="exportData()" style="width:100%; padding:8px; border-radius:8px; border:1px solid #ccc; background:none; cursor:pointer;">Copy Backup String</button>
         </div>
     </div>
 
     <script>
-        window.onload = updateDisplay;
+        // Ensure display updates immediately on load
+        window.onload = function() { updateDisplay(); };
 
         function switchTab(id, btn) {
-            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const contents = document.getElementsByClassName('tab-content');
+            for (let i = 0; i < contents.length; i++) { contents[i].classList.remove('active'); }
+            const buttons = document.getElementsByClassName('tab-btn');
+            for (let i = 0; i < buttons.length; i++) { buttons[i].classList.remove('active'); }
             document.getElementById(id).classList.add('active');
             btn.classList.add('active');
         }
 
-        // THE FIX: Robust URL Cleaning
         function getIconUrl(name) {
             if (!name) return "";
-            let clean = name.split('(')[0] // Remove Mega/Forms in brackets
-                            .toLowerCase()
-                            .trim()
-                            .replace(/[\.\']/g, '') // Remove dots (Mr. Mime) and quotes
-                            .replace(/\s+/g, '-');  // Replace spaces with dashes
-            
-            // Special Case: Nidoran
-            if(clean === "nidoran-f") clean = "nidoran-f";
-            if(clean === "nidoran-m") clean = "nidoran-m";
-
+            let clean = name.split('(')[0].toLowerCase().trim().replace(/[.\']/g, '').replace(/\s+/g, '-');
             return `https://img.pokemondb.net/sprites/sun-moon/icon/${clean}.png`;
         }
 
         function saveRun() {
-            const team = [document.getElementById('p1').value, document.getElementById('p2').value, document.getElementById('p3').value].filter(v => v);
+            const p1 = document.getElementById('p1').value.trim();
+            const p2 = document.getElementById('p2').value.trim();
+            const p3 = document.getElementById('p3').value.trim();
             const wins = parseInt(document.getElementById('wins').value);
-            if(!team.length || isNaN(wins)) return;
 
-            const data = JSON.parse(localStorage.getItem('bt_data') || '[]');
-            data.push({ team, wins, date: new Date().toLocaleDateString() });
-            localStorage.setItem('bt_data', JSON.stringify(data));
+            if (!p1 || isNaN(wins)) { alert("At least P1 and Wins are required."); return; }
+
+            const team = [p1, p2, p3].filter(v => v !== "");
+            const run = { team, wins, date: new Date().toLocaleDateString() };
+
+            const data = JSON.parse(localStorage.getItem('bt_records_final') || '[]');
+            data.push(run);
+            localStorage.setItem('bt_records_final', JSON.stringify(data));
             
             ['p1','p2','p3','wins'].forEach(id => document.getElementById(id).value = '');
             updateDisplay();
         }
 
         function updateDisplay() {
-            const data = JSON.parse(localStorage.getItem('bt_data') || '[]');
-            const stats = {};
+            const raw = localStorage.getItem('bt_records_final');
+            const data = raw ? JSON.parse(raw) : [];
+            
+            const statsList = document.getElementById('statsList');
+            const historyList = document.getElementById('historyList');
 
+            if (data.length === 0) {
+                statsList.innerHTML = '<div class="empty-state">No rankings yet. Record a run!</div>';
+                historyList.innerHTML = '<div class="empty-state">No history recorded.</div>';
+                return;
+            }
+
+            const stats = {};
             data.forEach(run => {
                 run.team.forEach(name => {
-                    if(!stats[name]) stats[name] = { wins: 0, runs: 0, max: 0 };
+                    if (!stats[name]) stats[name] = { wins: 0, runs: 0, max: 0, partners: new Set() };
                     stats[name].wins += run.wins;
                     stats[name].runs += 1;
-                    if(run.wins > stats[name].max) stats[name].max = run.wins;
+                    if (run.wins > stats[name].max) stats[name].max = run.wins;
+                    run.team.forEach(p => { if (p !== name) stats[name].partners.add(p); });
                 });
             });
 
             const sorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins);
             
-            document.getElementById('statsList').innerHTML = sorted.map(name => {
+            statsList.innerHTML = sorted.map(name => {
                 const s = stats[name];
                 const rating = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 
                 let badges = "";
                 if(s.max >= 100) badges += '<span class="badge badge-100">D</span>';
                 else if(s.max >= 50) badges += '<span class="badge badge-50">G</span>';
-                if(rating >= 45) badges += '<span class="badge badge-ace">A</span>';
+                if(rating >= 45 && s.runs >= 3) badges += '<span class="badge badge-ace">A</span>';
                 if(s.runs >= 6) badges += '<span class="badge badge-vet">★</span>';
+                if(s.partners.size >= 9) badges += '<span class="badge badge-spec">⬥</span>';
+                if(s.wins >= 500) badges += '<span class="badge badge-leg">L</span>';
 
                 return `
                 <div class="stat-box">
                     <span class="rating-chip">R: ${rating.toFixed(1)}</span>
                     <div style="font-weight:800; font-size:0.8rem; z-index:2; position:relative;">${name}</div>
-                    <div style="font-size:0.7rem; color:var(--secondary); z-index:2; position:relative;">Peak: ${s.max} ${badges}</div>
+                    <div style="font-size:0.7rem; color:var(--secondary); z-index:2; position:relative;">${s.wins} Wins ${badges}</div>
                     <img class="poke-sprite" src="${getIconUrl(name)}" onerror="this.style.display='none'">
                 </div>`;
             }).join('');
 
-            document.getElementById('historyList').innerHTML = data.reverse().map(run => `
+            historyList.innerHTML = [...data].reverse().map(run => `
                 <div class="card" style="padding:10px; margin-bottom:8px;">
                     <div style="font-weight:800; color:var(--primary);">${run.wins} Wins</div>
                     <div style="font-size:0.8rem;">${run.team.join(' / ')}</div>
                 </div>
             `).join('');
+        }
+
+        function exportData() {
+            const raw = localStorage.getItem('bt_records_final');
+            if(!raw) return alert("No data to copy.");
+            navigator.clipboard.writeText(raw).then(() => alert("Backup string copied to clipboard!"));
         }
     </script>
 </body>
