@@ -29,14 +29,12 @@
 
         h2 { margin-top: 0; color: var(--text-main); font-size: 1.1rem; font-weight: 800; border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
 
-        /* TAB LOGIC */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: var(--radius); }
         .tab-btn { flex: 1; padding: 10px; border: none; border-radius: 11px; background: none; cursor: pointer; font-weight: 700; color: var(--secondary); font-size: 0.8rem; }
         .tab-btn.active { background: var(--grad); color: white; }
         .tab-content { display: none; }
-        .tab-content.active { display: block; }
+        .tab-content.active { display: block !important; }
 
-        /* INPUTS */
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 10px; box-sizing: border-box; font-size: 0.9rem; }
         button { background: var(--grad); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 700; }
         .save-btn { width: 100%; font-size: 1rem; margin-top: 10px; background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
@@ -44,12 +42,10 @@
         .sort-btn { background: #f1f5f9; color: var(--secondary); font-size: 0.55rem; padding: 6px 10px; border-radius: 8px; font-weight: 800; border: 1px solid #e2e8f0; }
         .sort-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* GRID & SPRITES */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-box { background: white; padding: 12px; border-radius: 14px; border: 1px solid #f1f5f9; position: relative; min-height: 100px; overflow: hidden; }
-        .poke-sprite { position: absolute; bottom: -5px; right: -5px; width: 60px; height: 60px; image-rendering: pixelated; z-index: 1; }
+        .poke-sprite { position: absolute; bottom: -2px; right: -2px; width: 56px; height: 56px; image-rendering: pixelated; z-index: 1; }
         
-        /* BADGES */
         .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; font-weight: 900; margin-left: 2px; display: inline-block; }
         .badge-30 { background: #d97706; color: white; }
         .badge-40 { background: #94a3b8; color: white; }
@@ -90,7 +86,7 @@
         <div class="legend-item" onclick="jumpToGuide('ace')"><span class="badge badge-ace">A</span></div>
         <div class="legend-item" onclick="jumpToGuide('specialist')"><span class="badge badge-specialist">⬥</span></div>
         <div class="legend-item" onclick="jumpToGuide('legacy')"><span class="badge badge-legacy">L</span></div>
-        <span style="font-size: 0.6rem; color: var(--text-muted); align-self: center; margin-left: auto;">Definitions? Click a badge.</span>
+        <span style="font-size: 0.6rem; color: var(--text-muted); align-self: center; margin-left: auto;">Tap badge for info</span>
     </div>
 
     <div class="tabs">
@@ -153,10 +149,12 @@
 
         function jumpToGuide(id) {
             switchTab('settings', document.getElementById('btn-settings'));
-            const el = document.getElementById('guide-' + id);
-            el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            el.style.background = '#dbeafe';
-            setTimeout(() => { el.style.background = '#f8fafc'; }, 1500);
+            setTimeout(() => {
+                const el = document.getElementById('guide-' + id);
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                el.style.background = '#dbeafe';
+                setTimeout(() => { el.style.background = '#f8fafc'; }, 1500);
+            }, 50);
         }
 
         function saveRun() {
@@ -172,10 +170,12 @@
 
         function calculateRating(wins, runs) { return runs === 0 ? 0 : (wins / runs) * (1 + Math.log10(runs)); }
         
-        // REPAIRED SPRITE LOGIC
+        // ROBUST SPRITE URL CLEANER
         function extractSpecies(name) {
             let s = name.split('(')[0].trim().toLowerCase();
-            return s.replace(/\s+/g, '-').replace(/[.'"]/g, '');
+            s = s.replace(/[.']/g, ''); // Remove dots and apostrophes
+            s = s.replace(/\s+/g, '-'); // Spaces to dashes
+            return s;
         }
 
         function updateDisplay() {
@@ -204,6 +204,7 @@
             document.getElementById('statsList').innerHTML = sorted.map((name, i) => {
                 const s = stats[name];
                 const rat = calculateRating(s.wins, s.runs);
+                const species = extractSpecies(name);
                 let b = '';
                 if(s.max >= 100) b += '<span class="badge badge-100">D</span>';
                 else if(s.max >= 50) b += '<span class="badge badge-50">G</span>';
@@ -214,10 +215,12 @@
 
                 return `<div class="stat-box">
                     <span class="rating-chip">R: ${rat.toFixed(1)}</span>
-                    <div style="font-weight:800; font-size:0.75rem; margin-bottom:5px;">${name}</div>
-                    <div style="font-size:0.7rem;">Peak: ${s.max} ${b}</div>
-                    <div style="font-size:0.65rem; color:var(--text-muted);">Wins: ${s.wins} | Partners: ${s.partners.size}</div>
-                    <img class="poke-sprite" src="https://img.pokemondb.net/sprites/sun-moon/icon/${extractSpecies(name)}.png" onerror="this.style.display='none'">
+                    <div style="font-weight:800; font-size:0.75rem; margin-bottom:5px; position:relative; z-index:3;">${name}</div>
+                    <div style="font-size:0.7rem; position:relative; z-index:3;">Peak: ${s.max} ${b}</div>
+                    <div style="font-size:0.65rem; color:var(--text-muted); position:relative; z-index:3;">Wins: ${s.wins} | Partners: ${s.partners.size}</div>
+                    <img class="poke-sprite" 
+                         src="https://img.pokemondb.net/sprites/sun-moon/icon/${species}.png" 
+                         onerror="this.src='https://img.pokemondb.net/sprites/sword-shield/icon/${species}.png'; this.onerror=null;">
                 </div>`;
             }).join('');
 
