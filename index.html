@@ -16,6 +16,9 @@
             --text-main: #1e293b;
             --text-muted: #64748b;
             --radius: 16px;
+            /* New Badge Colors */
+            --specialist: #2dd4bf; /* Iridescent Teal */
+            --legacy: #1e293b;     /* Dark Obsidian */
         }
 
         body { 
@@ -75,16 +78,19 @@
         
         .rank-1 { border: 2px solid #fbbf24 !important; background: linear-gradient(to bottom, #fffcf0, #fff) !important; }
 
-        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; font-weight: 900; margin-left: 2px; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+        /* BADGES */
+        .badge { font-size: 0.6rem; padding: 2px 6px; border-radius: 6px; font-weight: 900; margin-left: 2px; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1); vertical-align: middle; }
         .badge-30 { background: #d97706; color: white; }
         .badge-40 { background: #94a3b8; color: white; }
         .badge-50 { background: #fbbf24; color: #78350f; }
         .badge-100 { background: #a855f7; color: white; }
         .badge-veteran { background: #818cf8; color: white; }
         .badge-ace { background: #10b981; color: white; }
+        .badge-specialist { background: var(--specialist); color: white; }
+        .badge-legacy { background: var(--legacy); color: white; }
         
-        .badge-legend { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #f1f5f9; }
-        .legend-item { display: flex; align-items: center; font-size: 0.65rem; color: var(--secondary); font-weight: 600; }
+        .badge-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; padding: 12px; background: #f8fafc; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .legend-item { display: flex; align-items: center; font-size: 0.6rem; color: var(--secondary); font-weight: 700; white-space: nowrap; }
 
         .rating-chip { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; background: #f0f7ff; color: var(--primary); padding: 3px 7px; border-radius: 20px; font-weight: 900; border: 1px solid #dbeafe; z-index: 2;}
         .rank-number { display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--secondary); font-size: 0.65rem; width: 22px; height: 22px; border-radius: 50%; margin-right: 6px; font-weight: 800; }
@@ -108,6 +114,18 @@
         <datalist id="poke-list"></datalist>
     </div>
 
+    <!-- MOVED KEY TO TOP -->
+    <div class="badge-legend" style="margin: 0 15px 15px 15px;">
+        <div class="legend-item"><span class="badge badge-30">B</span> 30+</div>
+        <div class="legend-item"><span class="badge badge-40">S</span> 40+</div>
+        <div class="legend-item"><span class="badge badge-50">G</span> 50+</div>
+        <div class="legend-item"><span class="badge badge-100">D</span> 100+</div>
+        <div class="legend-item"><span class="badge badge-veteran">★</span> 6+ Runs</div>
+        <div class="legend-item"><span class="badge badge-ace">A</span> Ace</div>
+        <div class="legend-item"><span class="badge badge-specialist">⬥</span> Specialist</div>
+        <div class="legend-item"><span class="badge badge-legacy">L</span> Legacy</div>
+    </div>
+
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('leaderboard', this)">Rankings</button>
         <button class="tab-btn" onclick="switchTab('history', this)">Activity Log</button>
@@ -122,10 +140,10 @@
                         <option value="all">Show All</option>
                         <option value="ace">Aces Only</option>
                         <option value="veteran">Veterans</option>
+                        <option value="specialist">Specialists</option>
+                        <option value="legacy">Legacy Holders</option>
                         <option value="100">Diamond Tier</option>
                         <option value="50">Gold Tier</option>
-                        <option value="40">Silver Tier</option>
-                        <option value="30">Bronze Tier</option>
                     </select>
                     <button class="sort-btn" id="sortName" onclick="setSort('name')">Name</button>
                     <button class="sort-btn active" id="sortWins" onclick="setSort('wins')">Wins</button>
@@ -134,15 +152,6 @@
                 </div>
             </h2>
             <div id="statsList" class="stats-grid"></div>
-
-            <div class="badge-legend">
-                <div class="legend-item"><span class="badge badge-30">B</span> 30+</div>
-                <div class="legend-item"><span class="badge badge-40">S</span> 40+</div>
-                <div class="legend-item"><span class="badge badge-50">G</span> 50+</div>
-                <div class="legend-item"><span class="badge badge-100">D</span> 100+</div>
-                <div class="legend-item"><span class="badge badge-veteran">★</span> 6+ Runs</div>
-                <div class="legend-item"><span class="badge badge-ace">A</span> Ace (High Rat)</div>
-            </div>
         </div>
     </div>
 
@@ -248,20 +257,10 @@
         }
 
         function calculateRating(wins, runs) { return runs === 0 ? 0 : (wins / runs) * (1 + Math.log10(runs)); }
+        
         function extractSpecies(fullName) {
             const match = fullName.match(/\(([^)]+)\)/);
             return (match ? match[1] : fullName).trim().toLowerCase().replace(/\s+/g, '-');
-        }
-
-        function getBadges(max, runs, rating) {
-            let b = '';
-            if(max >= 100) b += '<span class="badge badge-100">D</span>';
-            else if(max >= 50) b += '<span class="badge badge-50">G</span>';
-            else if(max >= 40) b += '<span class="badge badge-40">S</span>';
-            else if(max >= 30) b += '<span class="badge badge-30">B</span>';
-            if(runs >= 6) b += '<span class="badge badge-veteran">★</span>';
-            if(rating >= 45 && runs >= 3) b += '<span class="badge badge-ace">A</span>';
-            return b;
         }
 
         function updateDisplay() {
@@ -271,14 +270,18 @@
             const filterValue = document.getElementById('badgeFilter').value;
             const searchTerm = document.getElementById('histSearch').value.toLowerCase();
 
+            // Calculate base stats and find unique partners
             historyData.forEach(run => {
                 run.team.forEach(name => {
                     if(!name) return;
                     uniqueNames.add(name);
-                    if(!stats[name]) stats[name] = { wins: 0, runs: 0, max: 0 };
+                    if(!stats[name]) stats[name] = { wins: 0, runs: 0, max: 0, partners: new Set() };
                     stats[name].wins += run.wins;
                     stats[name].runs += 1;
                     if(run.wins > stats[name].max) stats[name].max = run.wins;
+                    
+                    // Track partners for Specialist badge
+                    run.team.forEach(p => { if(p !== name) stats[name].partners.add(p); });
                 });
             });
 
@@ -289,12 +292,11 @@
                 const r = calculateRating(s.wins, s.runs);
                 if (filterValue === 'ace') return (r >= 45 && s.runs >= 3);
                 if (filterValue === 'veteran') return (s.runs >= 6);
-                if (['100','50','40','30'].includes(filterValue)) {
+                if (filterValue === 'specialist') return (s.partners.size >= 9);
+                if (filterValue === 'legacy') return (s.wins >= 500);
+                if (['100','50'].includes(filterValue)) {
                     const val = parseInt(filterValue);
-                    if (val === 100) return s.max >= 100;
-                    if (val === 50) return s.max >= 50 && s.max < 100;
-                    if (val === 40) return s.max >= 40 && s.max < 50;
-                    if (val === 30) return s.max >= 30 && s.max < 40;
+                    return val === 100 ? s.max >= 100 : s.max >= 50 && s.max < 100;
                 }
                 return true;
             }).sort((a,b) => {
@@ -305,17 +307,31 @@
             });
 
             document.getElementById('statsList').innerHTML = sortedStats.map((name, index) => {
-                const rat = calculateRating(stats[name].wins, stats[name].runs);
+                const s = stats[name];
+                const rat = calculateRating(s.wins, s.runs);
                 const isFirst = (index === 0 && currentSort !== 'name');
+                
+                // Construct Badges
+                let badges = '';
+                if(s.max >= 100) badges += '<span class="badge badge-100">D</span>';
+                else if(s.max >= 50) badges += '<span class="badge badge-50">G</span>';
+                else if(s.max >= 40) badges += '<span class="badge badge-40">S</span>';
+                else if(s.max >= 30) badges += '<span class="badge badge-30">B</span>';
+                
+                if(s.runs >= 6) badges += '<span class="badge badge-veteran">★</span>';
+                if(rat >= 45 && s.runs >= 3) badges += '<span class="badge badge-ace">A</span>';
+                if(s.partners.size >= 9) badges += '<span class="badge badge-specialist">⬥</span>';
+                if(s.wins >= 500) badges += '<span class="badge badge-legacy">L</span>';
+
                 return `
                 <div class="stat-box ${isFirst ? 'rank-1' : ''}">
                     <span class="rating-chip">R: ${rat.toFixed(1)}</span>
                     <div style="font-weight:800; font-size:0.75rem; border-bottom: 1px solid #f1f5f9; margin-bottom: 6px; padding-right: 40px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                         <span class="rank-number">${index + 1}</span>${name}
                     </div>
-                    <div style="font-size:0.7rem;">Wins: <strong>${stats[name].wins}</strong></div>
-                    <div style="font-size:0.7rem;">Peak: <strong>${stats[name].max}</strong> ${getBadges(stats[name].max, stats[name].runs, rat)}</div>
-                    <div style="font-size:0.65rem; color:var(--text-muted);">Runs: ${stats[name].runs}</div>
+                    <div style="font-size:0.7rem;">Wins: <strong>${s.wins}</strong></div>
+                    <div style="font-size:0.7rem;">Peak: <strong>${s.max}</strong> ${badges}</div>
+                    <div style="font-size:0.65rem; color:var(--text-muted);">Runs: ${s.runs} | Partners: ${s.partners.size}</div>
                     <img class="poke-sprite" src="https://img.pokemondb.net/sprites/sun-moon/icon/${extractSpecies(name)}.png" onerror="this.style.display='none'">
                 </div>`;
             }).join('');
