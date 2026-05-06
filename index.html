@@ -9,7 +9,6 @@
             --bg: #f8fafc;
             --card-bg: #ffffff;
             --primary: #3b82f6;
-            --primary-dark: #2563eb;
             --secondary: #64748b;
             --accent: #10b981;
             --danger: #ef4444;
@@ -38,63 +37,55 @@
         }
 
         h2 { 
-            margin-top: 0; color: var(--text-main); font-size: 1.2rem; font-weight: 700;
+            margin-top: 0; color: var(--text-main); font-size: 1.1rem; font-weight: 700;
             border-bottom: 2px solid #f1f5f9; padding-bottom: 12px; 
             display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
         }
 
         #scrollTopBtn {
             display: none; position: fixed; bottom: 25px; right: 20px; z-index: 99;
-            border: none; outline: none; background: var(--primary); color: white;
-            cursor: pointer; width: 50px; height: 50px; border-radius: 50%;
+            border: none; background: var(--primary); color: white;
+            width: 45px; height: 45px; border-radius: 50%;
             box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.5); font-size: 20px;
         }
 
-        /* TABS LOGIC */
         .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 6px; border-radius: 14px; }
-        .tab-btn { 
-            flex: 1; padding: 12px; border: none; border-radius: 10px; background: none; 
-            cursor: pointer; font-weight: 600; color: var(--secondary); font-size: 0.85rem;
-        }
+        .tab-btn { flex: 1; padding: 12px; border: none; border-radius: 10px; background: none; cursor: pointer; font-weight: 600; color: var(--secondary); font-size: 0.8rem; }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
         .tab-content { display: none; }
         .tab-content.active { display: block !important; }
 
-        /* FORMS */
         input, select { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #cbd5e1; border-radius: 8px; box-sizing: border-box; font-size: 0.95rem; }
         button { background: var(--primary); color: white; border: none; padding: 10px 15px; border-radius: 10px; cursor: pointer; font-weight: 600; }
         .save-btn { background: var(--accent); width: 100%; font-size: 1rem; margin-top: 10px; }
         
-        .sort-btn { background: #f1f5f9; color: var(--secondary); font-size: 0.6rem; padding: 6px 8px; border-radius: 6px; text-transform: uppercase; border: 1px solid #e2e8f0; }
+        .sort-btn { background: #f1f5f9; color: var(--secondary); font-size: 0.55rem; padding: 5px 8px; border-radius: 6px; text-transform: uppercase; border: 1px solid #e2e8f0; }
         .sort-btn.active { background: var(--primary); color: white; }
-        .filter-select { width: auto; font-size: 0.7rem; padding: 4px 8px; height: 30px; margin: 0; background: #fff; border: 1.5px solid var(--primary); color: var(--primary); font-weight: 700; }
+        .filter-select { width: auto; font-size: 0.65rem; padding: 4px 6px; height: 30px; margin: 0; background: #fff; border: 1.5px solid var(--primary); color: var(--primary); font-weight: 700; border-radius: 8px;}
 
-        /* GRID */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .stat-box { background: white; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; position: relative; min-height: 95px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
         .poke-sprite { position: absolute; bottom: -4px; right: -4px; width: 55px; height: 55px; image-rendering: pixelated; z-index: 1; }
         
-        /* BADGES */
-        .badge { font-size: 0.65rem; padding: 2px 6px; border-radius: 5px; font-weight: 800; margin-left: 2px; display: inline-block; }
+        /* RESTORED BADGE STYLES */
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; font-weight: 800; margin-left: 2px; display: inline-block; vertical-align: middle; }
         .badge-30 { background: #d97706; color: white; }
         .badge-40 { background: #94a3b8; color: white; }
         .badge-50 { background: #fbbf24; color: #78350f; }
         .badge-100 { background: #a855f7; color: white; }
-        .badge-veteran { background: #818cf8; color: white; }
+        .badge-veteran { background: #a29bfe; color: white; }
         .badge-ace { background: #10b981; color: white; }
         
-        .badge-key { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; justify-content: center; border: 1px dashed #cbd5e1; }
-        .key-item { font-size: 0.6rem; color: var(--text-muted); font-weight: 600; }
+        .badge-key { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; padding: 10px; background: #f8fafc; border-radius: 10px; justify-content: center; border: 1px dashed #cbd5e1; }
+        .key-item { font-size: 0.55rem; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; }
         
-        /* HISTORY */
         .history-item { border-bottom: 1px solid #f1f5f9; padding: 15px 0; }
         .streak-count { font-size: 1.1rem; font-weight: 800; color: var(--primary); }
-        .team-display { font-size: 0.9rem; color: var(--text-main); font-weight: 500; margin-top: 5px; }
+        .team-display { font-size: 0.85rem; color: var(--text-main); font-weight: 500; margin-top: 5px; }
         .btn-small { background: #f1f5f9; color: var(--secondary); padding: 5px 10px; font-size: 0.7rem; border-radius: 6px; }
         
         .rating-chip { position: absolute; top: 8px; right: 8px; font-size: 0.6rem; background: #eff6ff; color: var(--primary); padding: 3px 6px; border-radius: 6px; font-weight: 800; border: 1px solid #dbeafe; z-index: 2;}
-        .rank-number { display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--secondary); font-size: 0.65rem; width: 20px; height: 20px; border-radius: 50%; margin-right: 6px; font-weight: 700; }
+        .rank-number { display: inline-flex; align-items: center; justify-content: center; background: #f1f5f9; color: var(--secondary); font-size: 0.65rem; width: 18px; height: 18px; border-radius: 50%; margin-right: 5px; font-weight: 700; }
         
         .hidden { display: none !important; }
     </style>
@@ -111,22 +102,21 @@
             <input type="text" id="p3" list="poke-list" placeholder="Slot 3">
             <input type="text" id="p4" list="poke-list" placeholder="Slot 4 (Opt)">
         </div>
-        <input type="number" id="wins" placeholder="Wins">
+        <input type="number" id="wins" placeholder="Streak Length">
         <button class="save-btn" onclick="saveRun()">Register Run</button>
         <datalist id="poke-list"></datalist>
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" id="btn-leaderboard" onclick="switchTab('leaderboard', this)">Leaderboard</button>
-        <button class="tab-btn" id="btn-history" onclick="switchTab('history', this)">History</button>
-        <button class="tab-btn" id="btn-settings" onclick="switchTab('settings', this)">Tools</button>
+        <button class="tab-btn active" onclick="switchTab('leaderboard', this)">Leaderboard</button>
+        <button class="tab-btn" onclick="switchTab('history', this)">History</button>
+        <button class="tab-btn" onclick="switchTab('settings', this)">Tools</button>
     </div>
 
-    <!-- LEADERBOARD -->
     <div id="leaderboard" class="tab-content active">
         <div class="card">
             <h2>Rankings
-                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; align-items: center;">
+                <div style="display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px; align-items: center;">
                     <select id="badgeFilter" class="filter-select" onchange="updateDisplay()">
                         <option value="all">All</option>
                         <option value="ace">Aces</option>
@@ -142,6 +132,10 @@
                 </div>
             </h2>
             <div class="badge-key">
+                <div class="key-item"><span class="badge badge-30">B</span> 30+</div>
+                <div class="key-item"><span class="badge badge-40">S</span> 40+</div>
+                <div class="key-item"><span class="badge badge-50">G</span> 50+</div>
+                <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
                 <div class="key-item"><span class="badge badge-veteran">★</span> Vet (6+)</div>
                 <div class="key-item"><span class="badge badge-ace">A</span> Ace (45+)</div>
             </div>
@@ -149,7 +143,6 @@
         </div>
     </div>
 
-    <!-- HISTORY -->
     <div id="history" class="tab-content">
         <div class="card">
             <h2>Activity Log
@@ -162,7 +155,6 @@
         </div>
     </div>
 
-    <!-- TOOLS -->
     <div id="settings" class="tab-content">
         <div class="card">
             <h2>Management</h2>
@@ -195,16 +187,13 @@
         };
 
         function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }
-
         function generateUniqueId() { return Date.now().toString(36) + Math.random().toString(36).substr(2, 5); }
 
         function migrateOldIds() {
             let history = JSON.parse(localStorage.getItem('bt_records')) || [];
-            let seenIds = new Set();
             let changed = false;
             history.forEach(run => {
-                if (!run.id || seenIds.has(run.id)) { run.id = generateUniqueId(); changed = true; }
-                seenIds.add(run.id);
+                if (!run.id) { run.id = generateUniqueId(); changed = true; }
             });
             if (changed) localStorage.setItem('bt_records', JSON.stringify(history));
         }
@@ -277,6 +266,17 @@
             return raw.trim().toLowerCase().replace(/\s+/g, '-');
         }
 
+        function getBadges(max, runs, rating) {
+            let b = '';
+            if(max >= 100) b += '<span class="badge badge-100">D</span>';
+            else if(max >= 50) b += '<span class="badge badge-50">G</span>';
+            else if(max >= 40) b += '<span class="badge badge-40">S</span>';
+            else if(max >= 30) b += '<span class="badge badge-30">B</span>';
+            if(runs >= 6) b += '<span class="badge badge-veteran">★</span>';
+            if(rating >= 45 && runs >= 3) b += '<span class="badge badge-ace">A</span>';
+            return b;
+        }
+
         function updateDisplay() {
             const historyData = JSON.parse(localStorage.getItem('bt_records')) || [];
             const stats = {};
@@ -304,7 +304,10 @@
                 if (filterValue === 'veteran') return (s.runs >= 6);
                 if (['100','50','40','30'].includes(filterValue)) {
                     const val = parseInt(filterValue);
-                    return s.max >= val && (filterValue === '100' ? true : s.max < (val === 50 ? 100 : val === 40 ? 50 : 40));
+                    if (val === 100) return s.max >= 100;
+                    if (val === 50) return s.max >= 50 && s.max < 100;
+                    if (val === 40) return s.max >= 40 && s.max < 50;
+                    if (val === 30) return s.max >= 30 && s.max < 40;
                 }
                 return true;
             }).sort((a,b) => {
@@ -351,17 +354,6 @@
                     </div>
                 </div>`;
             }).join('');
-        }
-
-        function getBadges(max, runs, rating) {
-            let b = '';
-            if(max >= 100) b += '<span class="badge badge-100">D</span>';
-            else if(max >= 50) b += '<span class="badge badge-50">G</span>';
-            else if(max >= 40) b += '<span class="badge badge-40">S</span>';
-            else if(max >= 30) b += '<span class="badge badge-30">B</span>';
-            if(runs >= 6) b += '<span class="badge badge-veteran">★</span>';
-            if(rating >= 45 && runs >= 3) b += '<span class="badge badge-ace">A</span>';
-            return b;
         }
 
         function exportData() {
