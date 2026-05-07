@@ -57,7 +57,7 @@
         .badge-vet { background: #6366f1; }
         .badge-spec { background: var(--specialist); }
         .badge-leg { background: var(--legacy); }
-        .badge-ace { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: 1.5px solid #fbbf24; color: #fff; }
+        .badge-ace { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: 1.5px solid #fbbf24; color: #fff; text-shadow: 0px 1px 2px rgba(0,0,0,0.3); }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 125px; text-align: center; }
@@ -82,11 +82,14 @@
         <h2 id="form-title">Record Run</h2>
         <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 8px;">Format: Nickname (Species)</div>
         <div class="input-grid">
-            <input type="text" id="p1" placeholder="Lead (Species)">
-            <input type="text" id="p2" placeholder="Sub (Species)">
-            <input type="text" id="p3" placeholder="Sub (Species)">
-            <input type="text" id="p4" placeholder="Opt (Species)">
+            <input type="text" id="p1" list="roster-list" placeholder="Lead (Species)">
+            <input type="text" id="p2" list="roster-list" placeholder="Sub (Species)">
+            <input type="text" id="p3" list="roster-list" placeholder="Sub (Species)">
+            <input type="text" id="p4" list="roster-list" placeholder="Opt (Species)">
         </div>
+        
+        <datalist id="roster-list"></datalist>
+
         <input type="number" id="wins" placeholder="Streak Wins" style="margin-top:8px;">
         <div id="btn-container">
             <button class="btn-main" onclick="saveRun()">Register Entry</button>
@@ -220,6 +223,11 @@
                     run.team.forEach(p => { if(p !== name) stats[name].partners.add(p); });
                 });
             });
+
+            // Update the Auto-Complete List (Datalist)
+            const allNames = Object.keys(stats).sort();
+            const listEl = document.getElementById('roster-list');
+            listEl.innerHTML = allNames.map(name => `<option value="${name}">`).join('');
 
             // HOF
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
