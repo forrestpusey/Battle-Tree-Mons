@@ -167,9 +167,18 @@
 
         <div class="card">
             <h2>Data Management</h2>
-            <textarea id="importBox" style="width:100%; height:80px; margin-bottom:10px;" placeholder="JSON Data..."></textarea>
-            <button class="btn-main" onclick="importData()" style="background:var(--accent);">Import JSON</button>
-            <button class="btn-main" style="background:#64748b;" onclick="exportData()">Copy Backup</button>
+            <p style="font-size: 0.75rem; color: #64748b;">Recommended: Use <b>Download Backup</b> to save a file to your phone. Use <b>Upload File</b> to restore it.</p>
+            
+            <button class="btn-main" style="background:#6366f1;" onclick="exportAsFile()">Download Backup (.json)</button>
+            <button class="btn-main" style="background:var(--accent);" onclick="document.getElementById('fileInput').click()">Upload File</button>
+            <input type="file" id="fileInput" style="display:none" accept=".json" onchange="handleFileUpload(event)">
+            
+            <hr style="margin: 20px 0; border: 0; border-top: 1px solid #e2e8f0;">
+            
+            <p style="font-size: 0.75rem; color: #64748b;">Manual Paste (Sanitized):</p>
+            <textarea id="importBox" style="width:100%; height:80px; margin-bottom:10px;" placeholder="Paste JSON text here..."></textarea>
+            <button class="btn-main" onclick="importData()" style="background:#475569;">Import Text</button>
+            
             <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe All Data</button>
         </div>
     </div>
@@ -316,22 +325,58 @@
             document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
         }
 
-        function importData() { 
-            try { 
-                let rawData = document.getElementById('importBox').value;
-                // Sanitize: Replace curly quotes with straight ones
-                let sanitizedData = rawData.replace(/[\u201C\u201D]/g, '"');
-                // Ensure it is valid JSON before saving
-                JSON.parse(sanitizedData);
-                localStorage.setItem(DB_KEY, sanitizedData); 
-                updateDisplay(); 
-                alert("Import Successful!");
-            } catch(e) { 
-                alert("Import Error: Make sure you've copied the full JSON block and that it contains only straight quotes."); 
-            } 
+        // --- ENHANCED IMPORT/EXPORT LOGIC ---
+
+        function exportAsFile() {
+            const data = localStorage.getItem(DB_KEY) || '[]';
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `battle_tree_backup_${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
         }
-        function exportData() { navigator.clipboard.writeText(localStorage.getItem(DB_KEY) || '[]'); alert("Copied!"); }
-        function clearAll() { if(confirm("Wipe?")) { localStorage.removeItem(DB_KEY); updateDisplay(); } }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                processImport(e.target.result);
+            };
+            reader.readAsText(file);
+        }
+
+        function importData() {
+            processImport(document.getElementById('importBox').value);
+        }
+
+        function processImport(rawText) {
+            try {
+                // Sanitization step:
+                // 1. Convert curly quotes (left/right) to straight quotes
+                // 2. Convert smart dashes to standard hyphens
+                // 3. Remove zero-width spaces or other invisible characters
+                let clean = rawText
+                    .replace(/[\u201C\u201D\u201E\u201F]/g, '"')
+                    .replace(/[\u2018\u2019\u201A\u201B]/g, "'")
+                    .replace(/[\u2013\u2014]/g, "-")
+                    .replace(/[\u200B-\u200D\uFEFF]/g, "");
+                
+                const parsed = JSON.parse(clean);
+                localStorage.setItem(DB_KEY, JSON.stringify(parsed));
+                updateDisplay();
+                alert("Data Successfully Loaded!");
+                document.getElementById('importBox').value = "";
+            } catch(e) {
+                alert("Error: Data format invalid. Try using the 'Upload File' method instead.");
+            }
+        }
+
+        function clearAll() { if(confirm("Wipe all data? This cannot be undone.")) { localStorage.removeItem(DB_KEY); updateDisplay(); } }
     </script>
 </body>
 </html>
