@@ -39,6 +39,7 @@
         button { cursor: pointer; border-radius: 8px; font-weight: 700; border: none; }
         .btn-main { width: 100%; background: var(--primary); color: white; padding: 12px; margin-top: 10px; }
         .btn-edit { background: #f1f5f9; color: #475569; padding: 6px 10px; font-size: 0.75rem; border: 1px solid #cbd5e1; }
+        .btn-del { background: #fef2f2; color: var(--danger); padding: 6px 10px; font-size: 0.75rem; border: 1px solid #fecaca; margin-left: 4px; }
 
         /* Tabs */
         .tabs { display: flex; gap: 5px; margin: 15px 0; background: #e2e8f0; padding: 4px; border-radius: 10px; }
@@ -87,9 +88,7 @@
             <input type="text" id="p3" list="roster-list" placeholder="Sub (Species)">
             <input type="text" id="p4" list="roster-list" placeholder="Opt (Species)">
         </div>
-        
         <datalist id="roster-list"></datalist>
-
         <input type="number" id="wins" placeholder="Streak Wins" style="margin-top:8px;">
         <div id="btn-container">
             <button class="btn-main" onclick="saveRun()">Register Entry</button>
@@ -105,7 +104,6 @@
     <div id="rank" class="tab-content active">
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
-
         <div class="card" style="padding:10px;">
             <div class="rank-key">
                 <span class="badge badge-100">D</span> <span class="badge badge-60">G</span> <span class="badge badge-40">S</span> <span class="badge badge-30">B</span> <span class="badge badge-ace">A</span> <span class="badge badge-spec">S</span> <span class="badge badge-leg">L</span> <span class="badge badge-vet">★</span>
@@ -211,6 +209,15 @@
             updateDisplay();
         }
 
+        function deleteRun(idx) {
+            if(confirm("Delete this run record permanently?")) {
+                let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+                data.splice(idx, 1);
+                localStorage.setItem(DB_KEY, JSON.stringify(data));
+                updateDisplay();
+            }
+        }
+
         function updateDisplay() {
             const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
             const stats = {};
@@ -224,12 +231,10 @@
                 });
             });
 
-            // Update the Auto-Complete List (Datalist)
             const allNames = Object.keys(stats).sort();
             const listEl = document.getElementById('roster-list');
             listEl.innerHTML = allNames.map(name => `<option value="${name}">`).join('');
 
-            // HOF
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
                 <div class="hof-slot">
@@ -240,7 +245,6 @@
                 </div>
             `).join('');
 
-            // Filter & Sort
             const sortVal = document.getElementById('sortSelect').value;
             const filterVal = document.getElementById('filterSelect').value;
             const search = document.getElementById('rankSearch').value.toLowerCase();
@@ -294,7 +298,6 @@
                 </div>`;
             }).join('');
 
-            // History
             const histSort = document.getElementById('histSortSelect').value;
             let histData = data.map((run, i) => ({...run, i}));
             if(histSort === 'recent') histData.reverse(); else histData.sort((a,b) => b.wins - a.wins);
@@ -303,7 +306,10 @@
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
-                        <button class="btn-edit" onclick="startEdit(${run.i})">Edit</button>
+                        <div>
+                            <button class="btn-edit" onclick="startEdit(${run.i})">Edit</button>
+                            <button class="btn-del" onclick="deleteRun(${run.i})">Delete</button>
+                        </div>
                     </div>
                     <div class="hist-team-row">
                         ${run.team.map(p => `
@@ -316,7 +322,6 @@
                 </div>`).join('');
         }
 
-        // Utils
         function startEdit(idx) {
             let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
             const run = data[idx]; currentEditIndex = idx;
