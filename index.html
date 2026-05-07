@@ -130,6 +130,8 @@
                     <option value="all">All Pokémon</option>
                     <option value="diamond">Diamond (100+ Peak)</option>
                     <option value="gold">Gold (60+ Peak)</option>
+                    <option value="silver">Silver (40+ Peak)</option>
+                    <option value="bronze">Bronze (30+ Peak)</option>
                     <option value="ace">Aces (45+ R)</option>
                     <option value="vet">Veterans (6+ Runs)</option>
                     <option value="spec">Specialists (12+ Partners)</option>
@@ -237,6 +239,8 @@
                 if(searchQuery && !name.toLowerCase().includes(searchQuery)) return false;
                 if(filterVal === 'diamond') return s.max >= 100;
                 if(filterVal === 'gold') return s.max >= 60;
+                if(filterVal === 'silver') return s.max >= 40;
+                if(filterVal === 'bronze') return s.max >= 30;
                 if(filterVal === 'spec') return s.partners.size >= 12;
                 if(filterVal === 'leg') return s.wins >= 500;
                 if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
@@ -276,7 +280,6 @@
                 </div>`;
             }).join('');
 
-            // Updated History Sorting Logic
             let historyData = data.map((run, index) => ({...run, i: index}));
             if(histSortVal === 'recent') {
                 historyData.reverse();
