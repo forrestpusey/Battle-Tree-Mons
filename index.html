@@ -44,7 +44,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* BADGES */
         .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; display: inline-block; margin-right: 3px; vertical-align: middle; }
         .badge-30 { background: #d97706; }
         .badge-40 { background: #94a3b8; }
@@ -54,7 +53,6 @@
         .badge-spec { background: var(--specialist); }
         .badge-leg { background: var(--legacy); }
         
-        /* NEW COOL ACE BADGE */
         .badge-ace { 
             background: linear-gradient(135deg, #059669 0%, #10b981 100%);
             border: 1.5px solid #fbbf24;
@@ -143,6 +141,12 @@
     </div>
 
     <div id="hist" class="tab-content">
+        <div class="card" style="padding: 10px; margin-bottom: 10px;">
+            <select id="histSortSelect" onchange="updateDisplay()">
+                <option value="recent">Sort: Most Recent</option>
+                <option value="streak">Sort: Highest Streak</option>
+            </select>
+        </div>
         <div id="historyList"></div>
     </div>
 
@@ -203,6 +207,7 @@
             const sortVal = document.getElementById('sortSelect').value;
             const filterVal = document.getElementById('filterSelect').value;
             const searchQuery = document.getElementById('rankSearch').value.toLowerCase();
+            const histSortVal = document.getElementById('histSortSelect').value;
 
             const stats = {};
             data.forEach(run => {
@@ -255,33 +260,31 @@
                 const s = stats[name];
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 let bc = ""; let bTags = "";
-
                 if(s.max >= 100) { bc = "border-diamond"; bTags += '<span class="badge badge-100">D</span>'; }
                 else if(s.max >= 60) { bc = "border-gold"; bTags += '<span class="badge badge-60">G</span>'; }
                 else if(s.max >= 40) { bTags += '<span class="badge badge-40">S</span>'; }
                 else if(s.max >= 30) { bTags += '<span class="badge badge-30">B</span>'; }
-                
                 if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
                 if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
-                
-                if(rat >= 45 && s.runs >= 3) { 
-                    if(!bc) bc = "border-ace"; 
-                    bTags += '<span class="badge badge-ace">A</span>'; 
-                }
-
+                if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
                 return `<div class="stat-box ${bc}">
                     <span class="rating-tag">${rat.toFixed(1)}</span>
                     <div style="font-weight:800; font-size:0.8rem;">${name}</div>
-                    <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">
-                        W: <b>${s.wins}</b> | P: <b>${s.max}</b><br>
-                        R: <b>${s.runs}</b> | T: <b>${s.partners.size}</b>
-                    </div>
+                    <div style="font-size:0.65rem; color:#64748b; margin-top:4px;">W: <b>${s.wins}</b> | P: <b>${s.max}</b><br>R: <b>${s.runs}</b> | T: <b>${s.partners.size}</b></div>
                     <div style="margin-top:5px;">${bTags}</div>
                 </div>`;
             }).join('');
 
-            document.getElementById('historyList').innerHTML = data.map((run, index) => ({...run, i: index})).reverse().map(run => `
+            // Updated History Sorting Logic
+            let historyData = data.map((run, index) => ({...run, i: index}));
+            if(histSortVal === 'recent') {
+                historyData.reverse();
+            } else if (histSortVal === 'streak') {
+                historyData.sort((a, b) => b.wins - a.wins);
+            }
+
+            document.getElementById('historyList').innerHTML = historyData.map(run => `
                 <div class="card" style="padding:10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
