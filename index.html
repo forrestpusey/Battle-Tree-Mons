@@ -46,7 +46,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* --- METALLIC PILL BADGES --- */
         .badge { 
             font-size: 0.6rem; padding: 3px 10px; color: white; font-weight: 900; display: inline-block; 
             margin-right: 3px; vertical-align: middle; border-radius: 20px; position: relative; overflow: hidden;
@@ -57,13 +56,10 @@
         .badge-40 { background: linear-gradient(to bottom, #94a3b8, #475569); }
         .badge-60 { background: linear-gradient(to bottom, #fbbf24, #b45309); color: #451a03; }
         .badge-100 { background: linear-gradient(135deg, #a855f7, #6366f1); border-color: rgba(255,255,255,0.4); }
-        .badge-100::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-25deg); animation: pill-shimmer 3s infinite; }
-        @keyframes pill-shimmer { 0% { left: -100%; } 30% { left: 200%; } 100% { left: 200%; } }
-
-        .badge-vet { background: #6366f1; border-radius: 4px; box-shadow: none; border: none; }
-        .badge-spec { background: var(--specialist); border-radius: 4px; box-shadow: none; border: none; }
-        .badge-leg { background: var(--legacy); border-radius: 4px; box-shadow: none; border: none; }
-        .badge-ace { background: linear-gradient(135deg, #059669, #10b981); border: 1.5px solid #fbbf24; color: #fff; border-radius: 4px; padding: 1px 5px; box-shadow: none; }
+        .badge-vet { background: #6366f1; border-radius: 4px; }
+        .badge-spec { background: var(--specialist); border-radius: 4px; }
+        .badge-leg { background: var(--legacy); border-radius: 4px; }
+        .badge-ace { background: linear-gradient(135deg, #059669, #10b981); border: 1.5px solid #fbbf24; color: #fff; border-radius: 4px; padding: 1px 5px; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 125px; text-align: center; }
@@ -72,6 +68,8 @@
         .border-ace { border-color: #10b981; border-width: 2px; }
 
         .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
+        .power-rank-tag { position: absolute; top: 8px; left: 8px; font-size: 0.6rem; color: #64748b; font-weight: 700; background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+        
         .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
         
         .hist-team-row { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; justify-content: center; }
@@ -82,7 +80,6 @@
         .glos-text { font-size: 0.75rem; color: #475569; }
         .glos-title { font-weight: 800; color: #1e293b; display: block; margin-bottom: 2px; }
 
-        /* Updated Key Layout */
         .badge-key-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #1e293b; color: white; padding: 10px; border-radius: 10px; margin-bottom: 12px; font-size: 0.55rem; }
         .key-item { display: flex; align-items: center; gap: 4px; }
     </style>
@@ -110,7 +107,6 @@
     </div>
 
     <div id="rank" class="tab-content active">
-        <!-- FULL 8 BADGE KEY -->
         <div class="badge-key-grid">
             <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
             <div class="key-item"><span class="badge badge-60">G</span> 60+</div>
@@ -129,6 +125,7 @@
             <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search Pokémon..." oninput="updateDisplay()">
             <div class="input-grid">
                 <select id="sortSelect" onchange="updateDisplay()">
+                    <option value="power">Power Score</option>
                     <option value="wins">Total Wins</option>
                     <option value="peak">Peak Streak</option>
                     <option value="ratio">Rating Ratio</option>
@@ -267,6 +264,22 @@
                 });
             });
 
+            // Calculate Power Scores and Global Ranking
+            const scoredList = Object.keys(stats).map(name => {
+                const s = stats[name];
+                // Power Score Formula: (Peak * 0.5) + (AvgWins * 0.3) + (Log10(TotalWins) * 20)
+                const avg = s.wins / s.runs;
+                const logWins = s.wins > 0 ? Math.log10(s.wins) * 20 : 0;
+                const powerScore = (s.max * 0.5) + (avg * 0.3) + logWins;
+                const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
+                return { name, powerScore, rat, ...s };
+            });
+
+            // Create a sorted copy to determine rank position
+            const sortedByPower = [...scoredList].sort((a,b) => b.powerScore - a.powerScore);
+            const rankMap = {};
+            sortedByPower.forEach((item, index) => { rankMap[item.name] = index + 1; });
+
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
                 <div class="hof-slot"><span class="hof-rank">#${i+1}</span><img class="pkmn-icon" src="${getIconUrl(name)}" onerror="this.style.opacity='0'"><span class="hof-name">${name}</span><span class="hof-wins">${stats[name].wins}W</span></div>
@@ -276,37 +289,30 @@
             const filterVal = document.getElementById('filterSelect').value;
             const search = document.getElementById('rankSearch').value.toLowerCase();
 
-            let names = Object.keys(stats).filter(n => {
-                const s = stats[n];
-                const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
-                if(search && !n.toLowerCase().includes(search)) return false;
+            let filtered = scoredList.filter(s => {
+                if(search && !s.name.toLowerCase().includes(search)) return false;
                 if(filterVal === 'diamond') return s.max >= 100;
                 if(filterVal === 'gold') return s.max >= 60;
                 if(filterVal === 'silver') return s.max >= 40;
                 if(filterVal === 'bronze') return s.max >= 30;
-                if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
+                if(filterVal === 'ace') return (s.rat >= 45 && s.runs >= 3);
                 if(filterVal === 'vet') return s.runs >= 6;
                 if(filterVal === 'spec') return s.partners.size >= 12;
                 if(filterVal === 'leg') return s.wins >= 500;
                 return true;
             });
 
-            names.sort((a,b) => {
-                if(sortVal === 'name') return a.localeCompare(b);
-                if(sortVal === 'peak') return stats[b].max - stats[a].max;
-                if(sortVal === 'runs') return stats[b].runs - stats[a].runs;
-                if(sortVal === 'ratio') {
-                    const rB = (stats[b].wins/stats[b].runs)*(1+Math.log10(stats[b].runs));
-                    const rA = (stats[a].wins/stats[a].runs)*(1+Math.log10(stats[a].runs));
-                    return rB - rA;
-                }
-                return stats[b].wins - stats[a].wins;
+            filtered.sort((a,b) => {
+                if(sortVal === 'name') return a.name.localeCompare(b.name);
+                if(sortVal === 'peak') return b.max - a.max;
+                if(sortVal === 'runs') return b.runs - a.runs;
+                if(sortVal === 'ratio') return b.rat - a.rat;
+                if(sortVal === 'power') return b.powerScore - a.powerScore;
+                return b.wins - a.wins;
             });
 
-            document.getElementById('statsList').innerHTML = names.map(name => {
-                const s = stats[name];
-                const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
-                let bc = s.max >= 100 ? "border-diamond" : s.max >= 60 ? "border-gold" : (rat >= 45 && s.runs >= 3) ? "border-ace" : "";
+            document.getElementById('statsList').innerHTML = filtered.map(s => {
+                let bc = s.max >= 100 ? "border-diamond" : s.max >= 60 ? "border-gold" : (s.rat >= 45 && s.runs >= 3) ? "border-ace" : "";
                 let bTags = "";
                 if(s.max >= 100) bTags += '<span class="badge badge-100">D</span>';
                 else if(s.max >= 60) bTags += '<span class="badge badge-60">G</span>';
@@ -315,9 +321,17 @@
                 if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
                 if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
-                if(rat >= 45 && s.runs >= 3) bTags += '<span class="badge badge-ace">A</span>';
+                if(s.rat >= 45 && s.runs >= 3) bTags += '<span class="badge badge-ace">A</span>';
                 
-                return `<div class="stat-box ${bc}"><span class="rating-tag">${rat.toFixed(1)}</span><img class="pkmn-icon" style="width:40px;height:40px;" src="${getIconUrl(name)}" onerror="this.style.opacity='0'"><div style="font-weight:800; font-size:0.7rem;">${name}</div><div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b> | Runs: <b>${s.runs}</b></div><div style="margin-top:6px;">${bTags}</div></div>`;
+                return `<div class="stat-box ${bc}">
+                    <span class="power-rank-tag">#${rankMap[s.name]}</span>
+                    <span class="rating-tag">${s.rat.toFixed(1)}</span>
+                    <img class="pkmn-icon" style="width:40px;height:40px;" src="${getIconUrl(s.name)}" onerror="this.style.opacity='0'">
+                    <div style="font-weight:800; font-size:0.7rem;">${s.name}</div>
+                    <div style="font-size:0.55rem; color:#64748b; margin-top:2px;">Power Score: <b>${s.powerScore.toFixed(1)}</b></div>
+                    <div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b> | Runs: <b>${s.runs}</b></div>
+                    <div style="margin-top:6px;">${bTags}</div>
+                </div>`;
             }).join('');
 
             const histSort = document.getElementById('histSortSelect').value;
