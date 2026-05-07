@@ -44,28 +44,38 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; display: inline-block; margin-right: 3px; }
+        /* BADGES */
+        .badge { font-size: 0.6rem; padding: 2px 5px; border-radius: 4px; color: white; font-weight: 900; display: inline-block; margin-right: 3px; vertical-align: middle; }
         .badge-30 { background: #d97706; }
         .badge-40 { background: #94a3b8; }
         .badge-60 { background: #fbbf24; color: #78350f; }
         .badge-100 { background: #a855f7; }
         .badge-vet { background: #6366f1; }
-        .badge-ace { background: #10b981; }
         .badge-spec { background: var(--specialist); }
         .badge-leg { background: var(--legacy); }
+        
+        /* NEW COOL ACE BADGE */
+        .badge-ace { 
+            background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+            border: 1.5px solid #fbbf24;
+            box-shadow: 0 0 5px rgba(16, 185, 129, 0.4);
+            color: #fff;
+            text-shadow: 0px 1px 2px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+        }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 90px; }
         
         .border-diamond { border-color: var(--brd-diamond); border-width: 2px; }
         .border-gold { border-color: var(--brd-gold); border-width: 2px; }
-        .border-ace { border-color: var(--brd-ace); border-width: 2px; }
+        .border-ace { border-color: #10b981; border-width: 2px; box-shadow: inset 0 0 8px rgba(16, 185, 129, 0.1); }
 
         .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
         .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
         .guide-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
 
-        /* Badge Key Styling */
         .rank-key { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; padding: 8px; background: #f1f5f9; border-radius: 8px; align-items: center; justify-content: center; border: 1px dashed #cbd5e1; }
         .key-link { font-size: 0.65rem; color: var(--primary); text-decoration: underline; margin-left: 5px; cursor: pointer; }
     </style>
@@ -92,7 +102,6 @@
         <button id="tab-util-btn" class="tab-btn" onclick="switchTab('util', this)">Settings/Guides</button>
     </div>
 
-    <!-- RANKINGS -->
     <div id="rank" class="tab-content active">
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
@@ -133,12 +142,10 @@
         <div class="stats-grid" id="statsList"></div>
     </div>
 
-    <!-- HISTORY -->
     <div id="hist" class="tab-content">
         <div id="historyList"></div>
     </div>
 
-    <!-- SETTINGS & GUIDES -->
     <div id="util" class="tab-content">
         <div class="card">
             <h2>Badge Definitions</h2>
@@ -257,7 +264,11 @@
                 if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
                 if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
-                if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
+                
+                if(rat >= 45 && s.runs >= 3) { 
+                    if(!bc) bc = "border-ace"; 
+                    bTags += '<span class="badge badge-ace">A</span>'; 
+                }
 
                 return `<div class="stat-box ${bc}">
                     <span class="rating-tag">${rat.toFixed(1)}</span>
