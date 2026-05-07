@@ -78,10 +78,13 @@
         .hist-pkmn { display: flex; flex-direction: column; align-items: center; min-width: 65px; }
         .hist-pkmn span { font-size: 0.55rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 60px; }
 
-        /* Glossary Styles */
         .glos-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
         .glos-text { font-size: 0.75rem; color: #475569; }
         .glos-title { font-weight: 800; color: #1e293b; display: block; margin-bottom: 2px; }
+
+        /* Updated Key Layout */
+        .badge-key-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; background: #1e293b; color: white; padding: 10px; border-radius: 10px; margin-bottom: 12px; font-size: 0.55rem; }
+        .key-item { display: flex; align-items: center; gap: 4px; }
     </style>
 </head>
 <body>
@@ -107,11 +110,16 @@
     </div>
 
     <div id="rank" class="tab-content active">
-        <div style="font-size: 0.65rem; background: #1e293b; color: white; padding: 8px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-around;">
-            <span><span class="badge badge-100">D</span> 100+</span>
-            <span><span class="badge badge-60">G</span> 60+</span>
-            <span><span class="badge badge-ace">A</span> Ace</span>
-            <span><span class="badge badge-vet" style="padding: 2px 5px;">★</span> Vet</span>
+        <!-- FULL 8 BADGE KEY -->
+        <div class="badge-key-grid">
+            <div class="key-item"><span class="badge badge-100">D</span> 100+</div>
+            <div class="key-item"><span class="badge badge-60">G</span> 60+</div>
+            <div class="key-item"><span class="badge badge-40">S</span> 40+</div>
+            <div class="key-item"><span class="badge badge-30">B</span> 30+</div>
+            <div class="key-item"><span class="badge badge-ace">A</span> Ace</div>
+            <div class="key-item"><span class="badge badge-vet" style="padding: 1px 4px;">★</span> Vet</div>
+            <div class="key-item"><span class="badge badge-spec">S</span> Spec</div>
+            <div class="key-item"><span class="badge badge-leg">L</span> Leg</div>
         </div>
 
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
