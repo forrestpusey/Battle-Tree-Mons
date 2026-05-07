@@ -72,7 +72,6 @@
         .hist-pkmn { display: flex; flex-direction: column; align-items: center; min-width: 65px; }
         .hist-pkmn span { font-size: 0.55rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 60px; }
 
-        /* Analytics Styles */
         .ana-row { display: flex; align-items: center; gap: 12px; padding: 10px; border-bottom: 1px solid #f1f5f9; }
         .ana-row:last-child { border-bottom: none; }
         .ana-label { font-size: 0.75rem; color: #64748b; flex: 1; }
@@ -235,8 +234,8 @@
         function updateDisplay() {
             const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
             const stats = {};
-            const leadStats = {}; // Tracking lead vs back
-            const duoStats = {}; // Tracking partner wins
+            const leadStats = {}; 
+            const duoStats = {}; 
 
             data.forEach(run => {
                 run.team.forEach((name, idx) => {
@@ -246,12 +245,10 @@
                     if(run.wins > stats[name].max) stats[name].max = run.wins;
                     run.team.forEach(p => { if(p !== name) stats[name].partners.add(p); });
 
-                    // Strategy Data
                     if(!leadStats[name]) leadStats[name] = { leadWins: 0, leadRuns: 0, backWins: 0, backRuns: 0 };
                     if(idx === 0) { leadStats[name].leadRuns++; leadStats[name].leadWins += run.wins; }
                     else { leadStats[name].backRuns++; leadStats[name].backWins += run.wins; }
 
-                    // Duo Tracking
                     run.team.forEach((p2, idx2) => {
                         if(idx < idx2) {
                             const pair = [name, p2].sort().join(' + ');
@@ -261,12 +258,10 @@
                 });
             });
 
-            // Update the Auto-Complete List
             const allNames = Object.keys(stats).sort();
             const listEl = document.getElementById('roster-list');
             listEl.innerHTML = allNames.map(name => `<option value="${name}">`).join('');
 
-            // HOF
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
                 <div class="hof-slot">
@@ -277,7 +272,6 @@
                 </div>
             `).join('');
 
-            // Ranking Filters
             const sortVal = document.getElementById('sortSelect').value;
             const filterVal = document.getElementById('filterSelect').value;
             const search = document.getElementById('rankSearch').value.toLowerCase();
@@ -326,12 +320,11 @@
                     <span class="rating-tag">${rat.toFixed(1)}</span>
                     <img class="pkmn-icon" style="width:40px;height:40px;" src="${getIconUrl(name)}" onerror="this.style.opacity='0'">
                     <div style="font-weight:800; font-size:0.7rem;">${name}</div>
-                    <div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b></div>
+                    <div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b> | Runs: <b>${s.runs}</b></div>
                     <div style="margin-top:6px;">${bTags}</div>
                 </div>`;
             }).join('');
 
-            // History
             const histSort = document.getElementById('histSortSelect').value;
             let histData = data.map((run, i) => ({...run, i}));
             if(histSort === 'recent') histData.reverse(); else histData.sort((a,b) => b.wins - a.wins);
@@ -355,15 +348,12 @@
                     </div>
                 </div>`).join('');
 
-            // --- Analytics Tab Rendering ---
-            // Top Lead Efficiency
             const bestLead = Object.keys(leadStats).sort((a,b) => {
                 const avgA = leadStats[a].leadWins / (leadStats[a].leadRuns || 1);
                 const avgB = leadStats[b].leadWins / (leadStats[b].leadRuns || 1);
                 return avgB - avgA;
             })[0] || "N/A";
 
-            // Top Power Duo
             const bestDuo = Object.keys(duoStats).sort((a,b) => duoStats[b] - duoStats[a])[0] || "N/A";
 
             document.getElementById('ana-synergy').innerHTML = `
@@ -371,7 +361,6 @@
                 <div class="ana-row"><span class="ana-label">Highest Winning Duo:</span> <span class="ana-val">${bestDuo}</span></div>
             `;
 
-            // Milestone Tracker
             const milestones = Object.keys(stats).map(name => {
                 const s = stats[name];
                 let next = "";
