@@ -46,59 +46,20 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* --- REDESIGNED METALLIC PILL BADGES --- */
+        /* --- METALLIC PILL BADGES --- */
         .badge { 
-            font-size: 0.6rem; 
-            padding: 3px 10px; 
-            color: white; 
-            font-weight: 900; 
-            display: inline-block; 
-            margin-right: 3px; 
-            vertical-align: middle; 
-            border-radius: 20px; /* Pill Shape */
-            position: relative;
-            overflow: hidden;
-            border: 1px solid rgba(0,0,0,0.1);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.1);
-            text-shadow: 0px 1px 1px rgba(0,0,0,0.3);
+            font-size: 0.6rem; padding: 3px 10px; color: white; font-weight: 900; display: inline-block; 
+            margin-right: 3px; vertical-align: middle; border-radius: 20px; position: relative; overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.1); text-shadow: 0px 1px 1px rgba(0,0,0,0.3);
         }
+        .badge::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%; background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent); pointer-events: none; }
+        .badge-30 { background: linear-gradient(to bottom, #b45309, #78350f); }
+        .badge-40 { background: linear-gradient(to bottom, #94a3b8, #475569); }
+        .badge-60 { background: linear-gradient(to bottom, #fbbf24, #b45309); color: #451a03; }
+        .badge-100 { background: linear-gradient(135deg, #a855f7, #6366f1); border-color: rgba(255,255,255,0.4); }
+        .badge-100::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent); transform: skewX(-25deg); animation: pill-shimmer 3s infinite; }
+        @keyframes pill-shimmer { 0% { left: -100%; } 30% { left: 200%; } 100% { left: 200%; } }
 
-        /* Gloss Overlay for all Pill Badges */
-        .badge::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 50%;
-            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
-            pointer-events: none;
-        }
-
-        .badge-30 { background: linear-gradient(to bottom, #b45309, #78350f); } /* Bronze */
-        .badge-40 { background: linear-gradient(to bottom, #94a3b8, #475569); } /* Silver */
-        .badge-60 { background: linear-gradient(to bottom, #fbbf24, #b45309); color: #451a03; } /* Gold */
-        
-        .badge-100 { 
-            background: linear-gradient(135deg, #a855f7, #6366f1);
-            border-color: rgba(255,255,255,0.4);
-        }
-        
-        .badge-100::after {
-            content: '';
-            position: absolute;
-            top: 0; left: -100%;
-            width: 50%; height: 100%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
-            transform: skewX(-25deg);
-            animation: pill-shimmer 3s infinite;
-        }
-
-        @keyframes pill-shimmer {
-            0% { left: -100%; }
-            30% { left: 200%; }
-            100% { left: 200%; }
-        }
-
-        /* Standard Achievement Ribbons */
         .badge-vet { background: #6366f1; border-radius: 4px; box-shadow: none; border: none; }
         .badge-spec { background: var(--specialist); border-radius: 4px; box-shadow: none; border: none; }
         .badge-leg { background: var(--legacy); border-radius: 4px; box-shadow: none; border: none; }
@@ -113,9 +74,6 @@
         .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
         .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
         
-        .rank-key { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; padding: 8px; background: #f1f5f9; border-radius: 8px; align-items: center; justify-content: center; border: 1px dashed #cbd5e1; }
-        .guide-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
-
         .hist-team-row { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; justify-content: center; }
         .hist-pkmn { display: flex; flex-direction: column; align-items: center; min-width: 65px; }
         .hist-pkmn span { font-size: 0.55rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 60px; }
@@ -124,13 +82,15 @@
         .ana-row:last-child { border-bottom: none; }
         .ana-label { font-size: 0.75rem; color: #64748b; flex: 1; }
         .ana-val { font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+
+        .archetype-banner { background: var(--legacy); color: white; padding: 15px; border-radius: 10px; text-align: center; margin-bottom: 10px; }
+        .archetype-title { font-size: 1.1rem; font-weight: 900; color: #fbbf24; text-transform: uppercase; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <div class="card">
         <h2 id="form-title">Record Run</h2>
-        <div style="font-size: 0.65rem; color: #64748b; margin-bottom: 8px;">Format: Nickname (Species)</div>
         <div class="input-grid">
             <input type="text" id="p1" list="roster-list" placeholder="Lead (Species)">
             <input type="text" id="p2" list="roster-list" placeholder="Sub (Species)">
@@ -148,16 +108,13 @@
         <button id="tab-rank-btn" class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
         <button id="tab-hist-btn" class="tab-btn" onclick="switchTab('hist', this)">History</button>
         <button id="tab-ana-btn" class="tab-btn" onclick="switchTab('ana', this)">Analytics</button>
-        <button id="tab-util-btn" class="tab-btn" onclick="switchTab('util', this)">Key & Data</button>
+        <button id="tab-util-btn" class="tab-btn" onclick="switchTab('util', this)">Data</button>
     </div>
 
     <div id="rank" class="tab-content active">
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
         <div class="card" style="padding:10px;">
-            <div class="rank-key">
-                <span class="badge badge-100">D</span> <span class="badge badge-60">G</span> <span class="badge badge-40">S</span> <span class="badge badge-30">B</span> <span class="badge badge-ace">A</span> <span class="badge badge-spec">S</span> <span class="badge badge-leg">L</span> <span class="badge badge-vet">★</span>
-            </div>
             <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search Pokémon..." oninput="updateDisplay()">
             <div class="input-grid">
                 <select id="sortSelect" onchange="updateDisplay()">
@@ -165,18 +122,12 @@
                     <option value="peak">Peak Streak</option>
                     <option value="ratio">Rating Ratio</option>
                     <option value="runs">Total Runs</option>
-                    <option value="name">Name A-Z</option>
                 </select>
                 <select id="filterSelect" onchange="updateDisplay()">
                     <option value="all">All Pokémon</option>
                     <option value="diamond">Diamond (100+)</option>
                     <option value="gold">Gold (60+)</option>
-                    <option value="silver">Silver (40+)</option>
-                    <option value="bronze">Bronze (30+)</option>
-                    <option value="ace">Aces (45+ Rat)</option>
-                    <option value="spec">Specialists (12+ Teammates)</option>
-                    <option value="vet">Veterans (6+ Runs)</option>
-                    <option value="leg">Legacy (500+ Wins)</option>
+                    <option value="ace">Aces (High Rating)</option>
                 </select>
             </div>
         </div>
@@ -194,35 +145,26 @@
     </div>
 
     <div id="ana" class="tab-content">
-        <div class="card">
-            <h2>Strategy Insights</h2>
-            <div id="ana-synergy"></div>
+        <div class="archetype-banner">
+            <div style="font-size: 0.65rem; opacity: 0.8; margin-bottom: 4px;">TRAINER STYLE</div>
+            <div id="ana-style-title" class="archetype-title">Analyzing...</div>
+            <div id="ana-style-desc" style="font-size: 0.75rem; margin-top: 5px; color: #94a3b8;">Record more runs to identify your archetype.</div>
         </div>
         <div class="card">
-            <h2>Badge Progress Tracker</h2>
-            <div id="ana-milestones"></div>
+            <h2>Power Couples (Avg Wins)</h2>
+            <div id="ana-couples"></div>
+        </div>
+        <div class="card">
+            <h2>Lead Performance</h2>
+            <div id="ana-leads"></div>
         </div>
     </div>
 
     <div id="util" class="tab-content">
         <div class="card">
-            <h2>Glossary</h2>
-            <div class="guide-row"><span class="badge badge-100">D</span> <b>Diamond:</b> Peak streak 100+</div>
-            <div class="guide-row"><span class="badge badge-60">G</span> <b>Gold:</b> Peak streak 60-99</div>
-            <div class="guide-row"><span class="badge badge-40">S</span> <b>Silver:</b> Peak streak 40-59</div>
-            <div class="guide-row"><span class="badge badge-30">B</span> <b>Bronze:</b> Peak streak 30-39</div>
-            <div class="guide-row"><span class="badge badge-ace">A</span> <b>Ace:</b> Rating 45+ (min 3 runs)</div>
-            <div class="guide-row"><span class="badge badge-spec">S</span> <b>Specialist:</b> 12+ Unique teammates</div>
-            <div class="guide-row"><span class="badge badge-vet">★</span> <b>Veteran:</b> 6+ Registered runs</div>
-            <div class="guide-row"><span class="badge badge-leg">L</span> <b>Legacy:</b> 500+ Cumulative wins</div>
-        </div>
-        <div class="card">
-            <h2>Data Management</h2>
             <button class="btn-main" style="background:#6366f1;" onclick="exportAsFile()">Download Backup (.json)</button>
             <button class="btn-main" style="background:var(--accent); margin-top:10px;" onclick="document.getElementById('fileInput').click()">Upload File</button>
             <input type="file" id="fileInput" style="display:none" accept=".json" onchange="handleFileUpload(event)">
-            <textarea id="importBox" style="width:100%; height:60px; margin-top:15px;" placeholder="Paste JSON text here..."></textarea>
-            <button class="btn-main" onclick="importData()" style="background:#475569;">Import Text</button>
             <button class="btn-main" style="background:var(--danger); margin-top:20px;" onclick="clearAll()">Wipe All Data</button>
         </div>
     </div>
@@ -271,7 +213,7 @@
         }
 
         function deleteRun(idx) {
-            if(confirm("Delete this run record permanently?")) {
+            if(confirm("Delete this?")) {
                 let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
                 data.splice(idx, 1);
                 localStorage.setItem(DB_KEY, JSON.stringify(data));
@@ -283,7 +225,14 @@
             const data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
             const stats = {};
             const leadStats = {}; 
-            const duoStats = {}; 
+            const pairData = {}; // { "A+B": { totalWins: X, count: Y } }
+
+            const archetypes = {
+                stall: ["chansey", "blissey", "toxapex", "porygon2", "slowbro", "gliscor", "ferrothorn", "hippowdon", "sableye", "skarmory"],
+                bulky: ["suicune", "metagross", "dragonite", "tyranitar", "tapu-fini", "scizor", "swampert", "kangaskhan", "gyro", "milotic"],
+                offense: ["garchomp", "salamence", "greninja", "blaziken", "lucario", "kartana", "tapu-koko", "mimikyu", "gengar", "aerodactyl"]
+            };
+            let styleCounts = { stall: 0, bulky: 0, offense: 0 };
 
             data.forEach(run => {
                 run.team.forEach((name, idx) => {
@@ -293,173 +242,107 @@
                     if(run.wins > stats[name].max) stats[name].max = run.wins;
                     run.team.forEach(p => { if(p !== name) stats[name].partners.add(p); });
 
-                    if(!leadStats[name]) leadStats[name] = { leadWins: 0, leadRuns: 0, backWins: 0, backRuns: 0 };
-                    if(idx === 0) { leadStats[name].leadRuns++; leadStats[name].leadWins += run.wins; }
-                    else { leadStats[name].backRuns++; leadStats[name].backWins += run.wins; }
+                    if(!leadStats[name]) leadStats[name] = { wins: 0, runs: 0 };
+                    if(idx === 0) { leadStats[name].runs++; leadStats[name].wins += run.wins; }
 
-                    run.team.forEach((p2, idx2) => {
-                        if(idx < idx2) {
-                            const pair = [name, p2].sort().join(' + ');
-                            duoStats[pair] = (duoStats[pair] || 0) + run.wins;
-                        }
-                    });
+                    // Style Tracker
+                    const sp = parseSpecies(name);
+                    for (let style in archetypes) {
+                        if (archetypes[style].some(a => sp.includes(a))) styleCounts[style]++;
+                    }
                 });
+
+                // Pair Tracker
+                for(let i=0; i < run.team.length; i++) {
+                    for(let j=i+1; j < run.team.length; j++) {
+                        const pair = [run.team[i], run.team[j]].sort().join(' + ');
+                        if(!pairData[pair]) pairData[pair] = { wins: 0, runs: 0 };
+                        pairData[pair].wins += run.wins;
+                        pairData[pair].runs++;
+                    }
+                }
             });
 
-            const allNames = Object.keys(stats).sort();
-            const listEl = document.getElementById('roster-list');
-            listEl.innerHTML = allNames.map(name => `<option value="${name}">`).join('');
-
+            // HOF & Rankings logic...
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
-                <div class="hof-slot">
-                    <span class="hof-rank">#${i+1}</span>
-                    <img class="pkmn-icon" src="${getIconUrl(name)}" onerror="this.style.opacity='0'">
-                    <span class="hof-name">${name}</span>
-                    <span class="hof-wins">${stats[name].wins}W</span>
-                </div>
+                <div class="hof-slot"><span class="hof-rank">#${i+1}</span><img class="pkmn-icon" src="${getIconUrl(name)}" onerror="this.style.opacity='0'"><span class="hof-name">${name}</span><span class="hof-wins">${stats[name].wins}W</span></div>
             `).join('');
 
             const sortVal = document.getElementById('sortSelect').value;
-            const filterVal = document.getElementById('filterSelect').value;
-            const search = document.getElementById('rankSearch').value.toLowerCase();
-
             let names = Object.keys(stats).filter(n => {
-                const s = stats[n];
-                const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
-                if(search && !n.toLowerCase().includes(search)) return false;
-                if(filterVal === 'diamond') return s.max >= 100;
-                if(filterVal === 'gold') return s.max >= 60;
-                if(filterVal === 'silver') return s.max >= 40;
-                if(filterVal === 'bronze') return s.max >= 30;
-                if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
-                if(filterVal === 'spec') return s.partners.size >= 12;
-                if(filterVal === 'vet') return s.runs >= 6;
-                if(filterVal === 'leg') return s.wins >= 500;
-                return true;
+                const search = document.getElementById('rankSearch').value.toLowerCase();
+                return search ? n.toLowerCase().includes(search) : true;
             });
-
-            names.sort((a,b) => {
-                if(sortVal === 'name') return a.localeCompare(b);
-                if(sortVal === 'peak') return stats[b].max - stats[a].max;
-                if(sortVal === 'runs') return stats[b].runs - stats[a].runs;
-                if(sortVal === 'ratio') {
-                    const rB = (stats[b].wins/stats[b].runs)*(1+Math.log10(stats[b].runs));
-                    const rA = (stats[a].wins/stats[a].runs)*(1+Math.log10(stats[a].runs));
-                    return rB - rA;
-                }
-                return stats[b].wins - stats[a].wins;
-            });
+            names.sort((a,b) => sortVal === 'peak' ? stats[b].max - stats[a].max : stats[b].wins - stats[a].wins);
 
             document.getElementById('statsList').innerHTML = names.map(name => {
                 const s = stats[name];
-                const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
-                let bc = ""; let bTags = "";
-                if(s.max >= 100) { bc = "border-diamond"; bTags += '<span class="badge badge-100">D</span>'; }
-                else if(s.max >= 60) { bc = "border-gold"; bTags += '<span class="badge badge-60">G</span>'; }
-                else if(s.max >= 40) { bTags += '<span class="badge badge-40">S</span>'; }
-                else if(s.max >= 30) { bTags += '<span class="badge badge-30">B</span>'; }
-                if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
-                if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
-                if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
-                if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
-                
-                return `<div class="stat-box ${bc}">
-                    <span class="rating-tag">${rat.toFixed(1)}</span>
+                let bTags = s.max >= 100 ? '<span class="badge badge-100">D</span>' : s.max >= 60 ? '<span class="badge badge-60">G</span>' : '';
+                return `<div class="stat-box">
                     <img class="pkmn-icon" style="width:40px;height:40px;" src="${getIconUrl(name)}" onerror="this.style.opacity='0'">
                     <div style="font-weight:800; font-size:0.7rem;">${name}</div>
-                    <div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b> | Runs: <b>${s.runs}</b></div>
+                    <div style="font-size:0.6rem; color:#64748b;">Peak: ${s.max} | Wins: ${s.wins}</div>
                     <div style="margin-top:6px;">${bTags}</div>
                 </div>`;
             }).join('');
 
-            const histSort = document.getElementById('histSortSelect').value;
-            let histData = data.map((run, i) => ({...run, i}));
-            if(histSort === 'recent') histData.reverse(); else histData.sort((a,b) => b.wins - a.wins);
+            // NEW ANALYTICS: Archetype
+            const sortedStyles = Object.entries(styleCounts).sort((a,b) => b[1] - a[1]);
+            const mainStyle = sortedStyles[0][1] > 0 ? sortedStyles[0][0] : "Mixed";
+            const styleLabels = { stall: ["Stall Specialist", "You prioritize attrition, defensive cores, and outlasting opponents."], bulky: ["Bulky Offense", "You favor balance, trading hits with high-HP tanks and pivots."], offense: ["Hyper Offense", "You prefer fast, hard-hitting sweepers to end battles quickly."], Mixed: ["Versatile Strategist", "You don't stick to one style, using a variety of team archetypes."] };
+            document.getElementById('ana-style-title').innerText = styleLabels[mainStyle][0];
+            document.getElementById('ana-style-desc').innerText = styleLabels[mainStyle][1];
 
-            document.getElementById('historyList').innerHTML = histData.map(run => `
+            // NEW ANALYTICS: Power Couples
+            const topPairs = Object.keys(pairData)
+                .filter(p => pairData[p].runs >= 1)
+                .sort((a,b) => (pairData[b].wins/pairData[b].runs) - (pairData[a].wins/pairData[a].runs))
+                .slice(0, 3);
+            
+            document.getElementById('ana-couples').innerHTML = topPairs.map(pair => `
+                <div class="ana-row">
+                    <span class="ana-label">${pair}</span>
+                    <span class="ana-val">${(pairData[pair].wins/pairData[pair].runs).toFixed(1)} Avg Wins</span>
+                </div>
+            `).join('') || '<div class="ana-label">Register pairs to see synergy data.</div>';
+
+            // NEW ANALYTICS: Lead Performance
+            const topLeads = Object.keys(leadStats)
+                .filter(l => leadStats[l].runs >= 1)
+                .sort((a,b) => (leadStats[b].wins/leadStats[b].runs) - (leadStats[a].wins/leadStats[a].runs))
+                .slice(0, 3);
+            
+            document.getElementById('ana-leads').innerHTML = topLeads.map(name => `
+                <div class="ana-row">
+                    <span class="ana-label">${name}</span>
+                    <span class="ana-val">${(leadStats[name].wins/leadStats[name].runs).toFixed(1)} Avg</span>
+                </div>
+            `).join('') || '<div class="ana-label">No lead data available.</div>';
+
+            // History rendering...
+            let histData = [...data].reverse();
+            document.getElementById('historyList').innerHTML = histData.map((run, i) => `
                 <div class="card">
                     <div style="display:flex; justify-content:space-between; align-items:center;">
                         <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
-                        <div>
-                            <button class="btn-edit" onclick="startEdit(${run.i})">Edit</button>
-                            <button class="btn-del" onclick="deleteRun(${run.i})">Delete</button>
-                        </div>
+                        <button class="btn-del" onclick="deleteRun(${data.length-1-i})">Delete</button>
                     </div>
-                    <div class="hist-team-row">
-                        ${run.team.map(p => `
-                            <div class="hist-pkmn">
-                                <img class="pkmn-icon" src="${getIconUrl(p)}" onerror="this.style.opacity='0'">
-                                <span>${p.split('(')[0].trim()}</span>
-                            </div>
-                        `).join('')}
-                    </div>
+                    <div class="hist-team-row">${run.team.map(p => `<div class="hist-pkmn"><img class="pkmn-icon" src="${getIconUrl(p)}" onerror="this.style.opacity='0'"><span>${p.split('(')[0]}</span></div>`).join('')}</div>
                 </div>`).join('');
-
-            const bestLead = Object.keys(leadStats).sort((a,b) => {
-                const avgA = leadStats[a].leadWins / (leadStats[a].leadRuns || 1);
-                const avgB = leadStats[b].leadWins / (leadStats[b].leadRuns || 1);
-                return avgB - avgA;
-            })[0] || "N/A";
-
-            const bestDuo = Object.keys(duoStats).sort((a,b) => duoStats[b] - duoStats[a])[0] || "N/A";
-
-            document.getElementById('ana-synergy').innerHTML = `
-                <div class="ana-row"><span class="ana-label">Best Average Lead:</span> <span class="ana-val">${bestLead}</span></div>
-                <div class="ana-row"><span class="ana-label">Highest Winning Duo:</span> <span class="ana-val">${bestDuo}</span></div>
-            `;
-
-            const milestones = Object.keys(stats).map(name => {
-                const s = stats[name];
-                let next = "";
-                if(s.wins < 500) next = `${500 - s.wins} wins to Legacy L`;
-                else if(s.runs < 6) next = `${6 - s.runs} runs to Veteran ★`;
-                else if(s.partners.size < 12) next = `${12 - s.partners.size} more unique teammates for Specialist S`;
-                return next ? `<div class="ana-row"><span class="ana-label">${name}</span> <span class="ana-val" style="font-size:0.65rem;">${next}</span></div>` : "";
-            }).join('');
-            document.getElementById('ana-milestones').innerHTML = milestones || '<div class="ana-label">All badges earned!</div>';
-        }
-
-        function startEdit(idx) {
-            let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
-            const run = data[idx]; currentEditIndex = idx;
-            document.getElementById('form-title').innerText = "Editing Run #" + (idx + 1);
-            [1,2,3,4].forEach(i => { document.getElementById('p'+i).value = run.team[i-1] || ''; });
-            document.getElementById('wins').value = run.wins;
-            document.getElementById('btn-container').innerHTML = `<button class="btn-main" style="background:#f59e0b" onclick="saveRun()">Update</button><button class="btn-main" style="background:#64748b; margin-top:5px;" onclick="cancelEdit()">Cancel</button>`;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function cancelEdit() {
-            currentEditIndex = -1;
-            document.getElementById('form-title').innerText = "Record Run";
-            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
-            document.getElementById('wins').value = '';
-            document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
-            updateDisplay();
         }
 
         function exportAsFile() {
             const data = localStorage.getItem(DB_KEY) || '[]';
             const blob = new Blob([data], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = `battle_tree_backup.json`; a.click();
+            const a = document.createElement('a'); a.href = url; a.download = `battle_tree_data.json`; a.click();
         }
 
         function handleFileUpload(e) {
             const reader = new FileReader();
-            reader.onload = ev => { processImport(ev.target.result); };
+            reader.onload = ev => { localStorage.setItem(DB_KEY, ev.target.result); updateDisplay(); };
             reader.readAsText(e.target.files[0]);
-        }
-
-        function importData() { processImport(document.getElementById('importBox').value); }
-
-        function processImport(raw) {
-            try {
-                let clean = raw.replace(/[\u201C\u201D\u201E\u201F]/g, '"').replace(/[\u2018\u2019\u201A\u201B]/g, "'");
-                localStorage.setItem(DB_KEY, JSON.stringify(JSON.parse(clean)));
-                updateDisplay(); alert("Success!");
-            } catch(e) { alert("Invalid JSON!"); }
         }
 
         function clearAll() { if(confirm("Wipe all data?")) { localStorage.removeItem(DB_KEY); updateDisplay(); } }
