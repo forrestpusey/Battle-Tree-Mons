@@ -64,6 +64,10 @@
         .rating-tag { position: absolute; top: 8px; right: 8px; font-size: 0.65rem; color: var(--primary); font-weight: 800; background: #eff6ff; padding: 2px 6px; border-radius: 10px; border: 1px solid #dbeafe; }
         .search-input { border: 2px solid var(--primary); font-weight: 600; margin-bottom: 10px; }
         .guide-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 0.85rem; }
+
+        /* Badge Key Styling */
+        .rank-key { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; padding: 8px; background: #f1f5f9; border-radius: 8px; align-items: center; justify-content: center; border: 1px dashed #cbd5e1; }
+        .key-link { font-size: 0.65rem; color: var(--primary); text-decoration: underline; margin-left: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -83,16 +87,29 @@
     </div>
 
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
-        <button class="tab-btn" onclick="switchTab('hist', this)">History</button>
-        <button class="tab-btn" onclick="switchTab('util', this)">Settings/Guides</button>
+        <button id="tab-rank-btn" class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
+        <button id="tab-hist-btn" class="tab-btn" onclick="switchTab('hist', this)">History</button>
+        <button id="tab-util-btn" class="tab-btn" onclick="switchTab('util', this)">Settings/Guides</button>
     </div>
 
+    <!-- RANKINGS -->
     <div id="rank" class="tab-content active">
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
 
         <div class="card" style="padding:10px;">
+            <div class="rank-key">
+                <span class="badge badge-100">D</span>
+                <span class="badge badge-60">G</span>
+                <span class="badge badge-40">S</span>
+                <span class="badge badge-30">B</span>
+                <span class="badge badge-spec">S</span>
+                <span class="badge badge-leg">L</span>
+                <span class="badge badge-ace">A</span>
+                <span class="badge badge-vet">★</span>
+                <span class="key-link" onclick="document.getElementById('tab-util-btn').click()">See Definitions</span>
+            </div>
+
             <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search name..." oninput="updateDisplay()">
             <div class="input-grid" style="margin-bottom:8px;">
                 <select id="sortSelect" onchange="updateDisplay()">
@@ -116,10 +133,12 @@
         <div class="stats-grid" id="statsList"></div>
     </div>
 
+    <!-- HISTORY -->
     <div id="hist" class="tab-content">
         <div id="historyList"></div>
     </div>
 
+    <!-- SETTINGS & GUIDES -->
     <div id="util" class="tab-content">
         <div class="card">
             <h2>Badge Definitions</h2>
@@ -185,8 +204,6 @@
                     stats[name].wins += run.wins;
                     stats[name].runs += 1;
                     if(run.wins > stats[name].max) stats[name].max = run.wins;
-                    
-                    // Specialist Logic: Track unique partners
                     run.team.forEach(partner => {
                         if(partner !== name) stats[name].partners.add(partner);
                     });
@@ -232,17 +249,13 @@
                 const rat = (s.wins / s.runs) * (1 + Math.log10(s.runs));
                 let bc = ""; let bTags = "";
 
-                // Peak Badges
                 if(s.max >= 100) { bc = "border-diamond"; bTags += '<span class="badge badge-100">D</span>'; }
                 else if(s.max >= 60) { bc = "border-gold"; bTags += '<span class="badge badge-60">G</span>'; }
                 else if(s.max >= 40) { bTags += '<span class="badge badge-40">S</span>'; }
                 else if(s.max >= 30) { bTags += '<span class="badge badge-30">B</span>'; }
                 
-                // New logic Badges
                 if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
                 if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
-                
-                // Performance Badges
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
                 if(rat >= 45 && s.runs >= 3) { if(!bc) bc = "border-ace"; bTags += '<span class="badge badge-ace">A</span>'; }
 
