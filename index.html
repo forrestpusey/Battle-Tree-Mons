@@ -77,6 +77,11 @@
         .hist-team-row { display: flex; gap: 8px; margin-top: 8px; overflow-x: auto; padding-bottom: 4px; justify-content: center; }
         .hist-pkmn { display: flex; flex-direction: column; align-items: center; min-width: 65px; }
         .hist-pkmn span { font-size: 0.55rem; color: #64748b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 60px; }
+
+        /* Glossary Styles */
+        .glos-item { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid #f1f5f9; }
+        .glos-text { font-size: 0.75rem; color: #475569; }
+        .glos-title { font-weight: 800; color: #1e293b; display: block; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -98,12 +103,20 @@
     <div class="tabs">
         <button id="tab-rank-btn" class="tab-btn active" onclick="switchTab('rank', this)">Rankings</button>
         <button id="tab-hist-btn" class="tab-btn" onclick="switchTab('hist', this)">History</button>
-        <button id="tab-util-btn" class="tab-btn" onclick="switchTab('util', this)">Data Management</button>
+        <button id="tab-util-btn" class="tab-btn" onclick="switchTab('util', this)">Settings</button>
     </div>
 
     <div id="rank" class="tab-content active">
+        <div style="font-size: 0.65rem; background: #1e293b; color: white; padding: 8px; border-radius: 8px; margin-bottom: 12px; display: flex; justify-content: space-around;">
+            <span><span class="badge badge-100">D</span> 100+</span>
+            <span><span class="badge badge-60">G</span> 60+</span>
+            <span><span class="badge badge-ace">A</span> Ace</span>
+            <span><span class="badge badge-vet" style="padding: 2px 5px;">★</span> Vet</span>
+        </div>
+
         <h3 style="font-size: 0.7rem; margin-bottom: 8px; color: #64748b; text-transform: uppercase; font-weight: 800;">🏆 Hall of Fame</h3>
         <div class="hof-container" id="hof-list"></div>
+
         <div class="card" style="padding:10px;">
             <input type="text" id="rankSearch" class="search-input" placeholder="🔍 Search Pokémon..." oninput="updateDisplay()">
             <div class="input-grid">
@@ -111,11 +124,19 @@
                     <option value="wins">Total Wins</option>
                     <option value="peak">Peak Streak</option>
                     <option value="ratio">Rating Ratio</option>
+                    <option value="runs">Total Runs</option>
+                    <option value="name">Name (A-Z)</option>
                 </select>
                 <select id="filterSelect" onchange="updateDisplay()">
                     <option value="all">All Pokémon</option>
                     <option value="diamond">Diamond (100+)</option>
                     <option value="gold">Gold (60+)</option>
+                    <option value="silver">Silver (40+)</option>
+                    <option value="bronze">Bronze (30+)</option>
+                    <option value="ace">Aces (High Rat)</option>
+                    <option value="vet">Veterans (6+ Runs)</option>
+                    <option value="spec">Specialists (12+ Partners)</option>
+                    <option value="leg">Legacies (500+ Wins)</option>
                 </select>
             </div>
         </div>
@@ -123,11 +144,29 @@
     </div>
 
     <div id="hist" class="tab-content">
+        <div class="card" style="padding: 10px; margin-bottom: 10px;">
+            <select id="histSortSelect" onchange="updateDisplay()">
+                <option value="recent">Sort: Most Recent</option>
+                <option value="streak">Sort: Highest Streak</option>
+            </select>
+        </div>
         <div id="historyList"></div>
     </div>
 
     <div id="util" class="tab-content">
         <div class="card">
+            <h2 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 10px;">Badge Glossary</h2>
+            <div class="glos-item"><span class="badge badge-100">D</span> <div class="glos-text"><span class="glos-title">Diamond Peak</span>Reached 100+ streak.</div></div>
+            <div class="glos-item"><span class="badge badge-60">G</span> <div class="glos-text"><span class="glos-title">Gold Peak</span>Reached 60+ streak.</div></div>
+            <div class="glos-item"><span class="badge badge-40">S</span> <div class="glos-text"><span class="glos-title">Silver Peak</span>Reached 40+ streak.</div></div>
+            <div class="glos-item"><span class="badge badge-30">B</span> <div class="glos-text"><span class="glos-title">Bronze Peak</span>Reached 30+ streak.</div></div>
+            <div class="glos-item"><span class="badge badge-ace">A</span> <div class="glos-text"><span class="glos-title">Ace Performer</span>High rating with 3+ runs.</div></div>
+            <div class="glos-item"><span class="badge badge-vet" style="padding: 2px 6px;">★</span> <div class="glos-text"><span class="glos-title">Veteran</span>Used in 6 or more separate runs.</div></div>
+            <div class="glos-item"><span class="badge badge-spec">S</span> <div class="glos-text"><span class="glos-title">Specialist</span>Paired with 12+ unique Pokémon.</div></div>
+            <div class="glos-item"><span class="badge badge-leg">L</span> <div class="glos-text"><span class="glos-title">Legacy</span>Accumulated 500+ total lifetime wins.</div></div>
+        </div>
+        <div class="card">
+            <h2>Data Management</h2>
             <button class="btn-main" style="background:#6366f1;" onclick="exportAsFile()">Download Backup (.json)</button>
             <button class="btn-main" style="background:var(--accent); margin-top:10px;" onclick="document.getElementById('fileInput').click()">Upload File</button>
             <input type="file" id="fileInput" style="display:none" accept=".json" onchange="handleFileUpload(event)">
@@ -178,8 +217,27 @@
             updateDisplay();
         }
 
+        function startEdit(idx) {
+            let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
+            const run = data[idx];
+            currentEditIndex = idx;
+            document.getElementById('form-title').innerText = "Edit Entry";
+            [1,2,3,4].forEach(i => { document.getElementById('p'+i).value = run.team[i-1] || ''; });
+            document.getElementById('wins').value = run.wins;
+            document.getElementById('btn-container').innerHTML = `<button class="btn-main" style="background:#f59e0b" onclick="saveRun()">Update Record</button><button class="btn-main" style="background:#64748b; margin-top:5px;" onclick="cancelEdit()">Cancel</button>`;
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function cancelEdit() {
+            currentEditIndex = -1;
+            document.getElementById('form-title').innerText = "Record Run";
+            [1,2,3,4].forEach(i => document.getElementById('p'+i).value = '');
+            document.getElementById('wins').value = '';
+            document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
+        }
+
         function deleteRun(idx) {
-            if(confirm("Delete this?")) {
+            if(confirm("Delete this record permanently?")) {
                 let data = JSON.parse(localStorage.getItem(DB_KEY) || '[]');
                 data.splice(idx, 1);
                 localStorage.setItem(DB_KEY, JSON.stringify(data));
@@ -203,12 +261,7 @@
 
             const hofSorted = Object.keys(stats).sort((a,b) => stats[b].wins - stats[a].wins).slice(0, 6);
             document.getElementById('hof-list').innerHTML = hofSorted.map((name, i) => `
-                <div class="hof-slot">
-                    <span class="hof-rank">#${i+1}</span>
-                    <img class="pkmn-icon" src="${getIconUrl(name)}" onerror="this.style.opacity='0'">
-                    <span class="hof-name">${name}</span>
-                    <span class="hof-wins">${stats[name].wins}W</span>
-                </div>
+                <div class="hof-slot"><span class="hof-rank">#${i+1}</span><img class="pkmn-icon" src="${getIconUrl(name)}" onerror="this.style.opacity='0'"><span class="hof-name">${name}</span><span class="hof-wins">${stats[name].wins}W</span></div>
             `).join('');
 
             const sortVal = document.getElementById('sortSelect').value;
@@ -217,14 +270,23 @@
 
             let names = Object.keys(stats).filter(n => {
                 const s = stats[n];
+                const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
                 if(search && !n.toLowerCase().includes(search)) return false;
                 if(filterVal === 'diamond') return s.max >= 100;
                 if(filterVal === 'gold') return s.max >= 60;
+                if(filterVal === 'silver') return s.max >= 40;
+                if(filterVal === 'bronze') return s.max >= 30;
+                if(filterVal === 'ace') return (rat >= 45 && s.runs >= 3);
+                if(filterVal === 'vet') return s.runs >= 6;
+                if(filterVal === 'spec') return s.partners.size >= 12;
+                if(filterVal === 'leg') return s.wins >= 500;
                 return true;
             });
 
             names.sort((a,b) => {
+                if(sortVal === 'name') return a.localeCompare(b);
                 if(sortVal === 'peak') return stats[b].max - stats[a].max;
+                if(sortVal === 'runs') return stats[b].runs - stats[a].runs;
                 if(sortVal === 'ratio') {
                     const rB = (stats[b].wins/stats[b].runs)*(1+Math.log10(stats[b].runs));
                     const rA = (stats[a].wins/stats[a].runs)*(1+Math.log10(stats[a].runs));
@@ -236,7 +298,7 @@
             document.getElementById('statsList').innerHTML = names.map(name => {
                 const s = stats[name];
                 const rat = (s.wins/s.runs)*(1+Math.log10(s.runs));
-                let bc = s.max >= 100 ? "border-diamond" : s.max >= 60 ? "border-gold" : "";
+                let bc = s.max >= 100 ? "border-diamond" : s.max >= 60 ? "border-gold" : (rat >= 45 && s.runs >= 3) ? "border-ace" : "";
                 let bTags = "";
                 if(s.max >= 100) bTags += '<span class="badge badge-100">D</span>';
                 else if(s.max >= 60) bTags += '<span class="badge badge-60">G</span>';
@@ -245,26 +307,17 @@
                 if(s.partners.size >= 12) bTags += '<span class="badge badge-spec">S</span>';
                 if(s.wins >= 500) bTags += '<span class="badge badge-leg">L</span>';
                 if(s.runs >= 6) bTags += '<span class="badge badge-vet">★</span>';
+                if(rat >= 45 && s.runs >= 3) bTags += '<span class="badge badge-ace">A</span>';
                 
-                return `<div class="stat-box ${bc}">
-                    <span class="rating-tag">${rat.toFixed(1)}</span>
-                    <img class="pkmn-icon" style="width:40px;height:40px;" src="${getIconUrl(name)}" onerror="this.style.opacity='0'">
-                    <div style="font-weight:800; font-size:0.7rem;">${name}</div>
-                    <div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b> | Runs: <b>${s.runs}</b></div>
-                    <div style="margin-top:6px;">${bTags}</div>
-                </div>`;
+                return `<div class="stat-box ${bc}"><span class="rating-tag">${rat.toFixed(1)}</span><img class="pkmn-icon" style="width:40px;height:40px;" src="${getIconUrl(name)}" onerror="this.style.opacity='0'"><div style="font-weight:800; font-size:0.7rem;">${name}</div><div style="font-size:0.6rem; color:#64748b;">Peak: <b>${s.max}</b> | Wins: <b>${s.wins}</b> | Runs: <b>${s.runs}</b></div><div style="margin-top:6px;">${bTags}</div></div>`;
             }).join('');
 
-            document.getElementById('historyList').innerHTML = [...data].reverse().map((run, i) => `
-                <div class="card">
-                    <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span>
-                        <button class="btn-del" onclick="deleteRun(${data.length-1-i})">Delete</button>
-                    </div>
-                    <div class="hist-team-row">
-                        ${run.team.map(p => `<div class="hist-pkmn"><img class="pkmn-icon" src="${getIconUrl(p)}" onerror="this.style.opacity='0'"><span>${p.split('(')[0]}</span></div>`).join('')}
-                    </div>
-                </div>`).join('');
+            const histSort = document.getElementById('histSortSelect').value;
+            let histData = data.map((run, i) => ({...run, i}));
+            if(histSort === 'recent') histData.reverse(); else histData.sort((a,b) => b.wins - a.wins);
+
+            document.getElementById('historyList').innerHTML = histData.map(run => `
+                <div class="card"><div style="display:flex; justify-content:space-between; align-items:center;"><span style="font-weight:800; color:var(--primary);">${run.wins} Wins</span><div><button class="btn-edit" onclick="startEdit(${run.i})">Edit</button><button class="btn-del" onclick="deleteRun(${run.i})">Delete</button></div></div><div class="hist-team-row">${run.team.map(p => `<div class="hist-pkmn"><img class="pkmn-icon" src="${getIconUrl(p)}" onerror="this.style.opacity='0'"><span>${p.split('(')[0]}</span></div>`).join('')}</div></div>`).join('');
         }
 
         function exportAsFile() {
