@@ -46,49 +46,63 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
 
-        /* --- REDESIGNED SHIELD BADGES --- */
+        /* --- REDESIGNED METALLIC PILL BADGES --- */
         .badge { 
-            font-size: 0.65rem; 
-            padding: 4px 8px; 
+            font-size: 0.6rem; 
+            padding: 3px 10px; 
             color: white; 
             font-weight: 900; 
             display: inline-block; 
             margin-right: 3px; 
             vertical-align: middle; 
-            clip-path: polygon(10% 0%, 90% 0%, 100% 50%, 90% 100%, 10% 100%, 0% 50%);
-            text-shadow: 0px 1px 1px rgba(0,0,0,0.5);
-        }
-
-        .badge-30 { background: #a16207; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3); } /* Bronze */
-        .badge-40 { background: #64748b; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3); } /* Silver */
-        .badge-60 { background: #eab308; box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3); } /* Gold */
-        
-        .badge-100 { 
-            background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%);
-            box-shadow: inset 0 -2px 0 rgba(0,0,0,0.3);
+            border-radius: 20px; /* Pill Shape */
             position: relative;
             overflow: hidden;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 0px 1px 1px rgba(0,0,0,0.3);
         }
+
+        /* Gloss Overlay for all Pill Badges */
+        .badge::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.2), transparent);
+            pointer-events: none;
+        }
+
+        .badge-30 { background: linear-gradient(to bottom, #b45309, #78350f); } /* Bronze */
+        .badge-40 { background: linear-gradient(to bottom, #94a3b8, #475569); } /* Silver */
+        .badge-60 { background: linear-gradient(to bottom, #fbbf24, #b45309); color: #451a03; } /* Gold */
+        
+        .badge-100 { 
+            background: linear-gradient(135deg, #a855f7, #6366f1);
+            border-color: rgba(255,255,255,0.4);
+        }
+        
         .badge-100::after {
             content: '';
             position: absolute;
-            top: -50%; left: -50%;
-            width: 200%; height: 200%;
-            background: linear-gradient(to right, transparent, rgba(255,255,255,0.3), transparent);
-            transform: rotate(30deg);
-            animation: shimmer 3s infinite;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent);
+            transform: skewX(-25deg);
+            animation: pill-shimmer 3s infinite;
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-150%) rotate(30deg); }
-            100% { transform: translateX(150%) rotate(30deg); }
+        @keyframes pill-shimmer {
+            0% { left: -100%; }
+            30% { left: 200%; }
+            100% { left: 200%; }
         }
 
-        /* Standard Badges (Achievements) */
-        .badge-vet { background: #6366f1; border-radius: 4px; clip-path: none; padding: 2px 5px; }
-        .badge-spec { background: var(--specialist); border-radius: 4px; clip-path: none; padding: 2px 5px; }
-        .badge-leg { background: var(--legacy); border-radius: 4px; clip-path: none; padding: 2px 5px; }
-        .badge-ace { background: linear-gradient(135deg, #059669 0%, #10b981 100%); border: 1.5px solid #fbbf24; color: #fff; border-radius: 4px; clip-path: none; padding: 1px 4px; }
+        /* Standard Achievement Ribbons */
+        .badge-vet { background: #6366f1; border-radius: 4px; box-shadow: none; border: none; }
+        .badge-spec { background: var(--specialist); border-radius: 4px; box-shadow: none; border: none; }
+        .badge-leg { background: var(--legacy); border-radius: 4px; box-shadow: none; border: none; }
+        .badge-ace { background: linear-gradient(135deg, #059669, #10b981); border: 1.5px solid #fbbf24; color: #fff; border-radius: 4px; padding: 1px 5px; box-shadow: none; }
 
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
         .stat-box { background: white; padding: 12px; border-radius: 12px; border: 2px solid #e2e8f0; position: relative; min-height: 125px; text-align: center; }
