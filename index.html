@@ -316,7 +316,20 @@
             document.getElementById('btn-container').innerHTML = `<button class="btn-main" onclick="saveRun()">Register Entry</button>`;
         }
 
-        function importData() { try { localStorage.setItem(DB_KEY, document.getElementById('importBox').value); updateDisplay(); } catch(e) { alert("Error"); } }
+        function importData() { 
+            try { 
+                let rawData = document.getElementById('importBox').value;
+                // Sanitize: Replace curly quotes with straight ones
+                let sanitizedData = rawData.replace(/[\u201C\u201D]/g, '"');
+                // Ensure it is valid JSON before saving
+                JSON.parse(sanitizedData);
+                localStorage.setItem(DB_KEY, sanitizedData); 
+                updateDisplay(); 
+                alert("Import Successful!");
+            } catch(e) { 
+                alert("Import Error: Make sure you've copied the full JSON block and that it contains only straight quotes."); 
+            } 
+        }
         function exportData() { navigator.clipboard.writeText(localStorage.getItem(DB_KEY) || '[]'); alert("Copied!"); }
         function clearAll() { if(confirm("Wipe?")) { localStorage.removeItem(DB_KEY); updateDisplay(); } }
     </script>
